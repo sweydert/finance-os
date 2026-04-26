@@ -1307,7 +1307,6 @@ async function askAI(type, btn) {
 
   } catch(err) {
     loading.style.display = 'none';
-    respText.style.display= 'block';
     respText.textContent  = 'Error: ' + err.message + ' — Check browser console (F12) for details.';
   }
 }
