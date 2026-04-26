@@ -6,6 +6,7 @@
   <title>Finance OS vs. Code-First Platform — Fit Comparator</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -282,7 +283,13 @@
     .ai-panel-title { font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--fos); }
     .ai-close-btn { font-family:inherit; font-size:11px; font-weight:700; color:var(--muted); background:none; border:1px solid var(--border); border-radius:5px; padding:3px 10px; cursor:pointer; }
     .ai-close-btn:hover { color:var(--text); border-color:var(--sub); }
-    .ai-response { font-size:13px; line-height:1.75; color:#2E2E34; white-space:pre-wrap; }
+    .ai-response { font-size:13px; line-height:1.75; color:#2E2E34; }
+    .ai-response h1,.ai-response h2,.ai-response h3 { font-size:13px; font-weight:700; color:var(--fos); margin:12px 0 4px; }
+    .ai-response p { margin-bottom:8px; }
+    .ai-response strong { font-weight:700; }
+    .ai-response ul,.ai-response ol { padding-left:18px; margin-bottom:8px; }
+    .ai-response li { margin-bottom:3px; }
+    .ai-response hr { border:none; border-top:1px solid var(--border); margin:12px 0; }
     .ai-loading { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12px; }
     .ai-spinner { width:16px; height:16px; border:2px solid var(--fos-mid); border-top-color:var(--fos); border-radius:50%; animation:spin 0.8s linear infinite; flex-shrink:0; }
     @keyframes spin { to { transform:rotate(360deg); } }
@@ -477,13 +484,13 @@
     <div class="left-col">
 
       <div class="radar-card">
-        <div class="section-label">10-Dimension Fit Profile</div>
+        <div class="section-label">11-Dimension Fit Profile</div>
         <canvas id="radarChart"></canvas>
         <div class="radar-legend">
           <div class="leg-item"><div class="leg-dot" style="background:var(--fos)"></div>Finance OS architecture</div>
           <div class="leg-item"><div class="leg-dot" style="background:var(--cf)"></div>Code-first data platform</div>
         </div>
-        <div class="footnote">† At Fabric tier, Finance OS reaches near-parity with code-first on enterprise data scale for finance's core needs. ‡ Incumbent IT influence reflects organisational inertia favouring existing IT-owned data stacks — the primary real-world driver of code-first adoption in finance.</div>
+        <div class="footnote">† At Fabric tier, Finance OS reaches near-parity with code-first on enterprise data scale for finance's core needs. ‡ Incumbent IT influence reflects organisational inertia favouring existing IT-owned data stacks — the primary real-world driver of code-first adoption in finance. § AI readiness reflects the capacity of each architecture to safely power AI in finance workflows. A finance-owned, deterministic semantic layer gives AI a trustworthy, auditable foundation — a prerequisite for AI-assisted reporting and forecasting that a CFO can stand behind.</div>
       </div>
 
       <!-- SPRINT FEE CARD — computed output -->
@@ -681,6 +688,11 @@
           <td class="fos-td">Designed for tie-out to source and audit trails</td>
           <td class="cf-td">Frequent "numbers finance can't reconcile" outcomes</td>
         </tr>
+        <tr>
+          <td class="cat-td">AI readiness §</td>
+          <td class="fos-td">Deterministic semantic layer is the prerequisite for safe AI — finance-owned meaning gives AI a trustworthy, auditable foundation for reporting and forecasting</td>
+          <td class="cf-td">Distributed logic and opaque pipelines make AI outputs unreliable for finance — AI cannot safely reason over meaning it cannot see or verify</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -797,7 +809,7 @@ const RADAR_LABELS = [
   'Speed to value','Maintenance simplicity','Iteration agility',
   'Cost efficiency','Logic transparency','Financial sophistication',
   'Finance ownership','Enterprise data scale †','Cross-func breadth †',
-  'Incumbent IT influence ‡'
+  'Incumbent IT influence ‡','AI readiness §'
 ];
 
 const radarChart = new Chart(document.getElementById('radarChart').getContext('2d'),{
@@ -805,10 +817,10 @@ const radarChart = new Chart(document.getElementById('radarChart').getContext('2
   data:{
     labels:RADAR_LABELS,
     datasets:[
-      { label:'Finance OS', data:new Array(10).fill(8),
+      { label:'Finance OS', data:new Array(11).fill(8),
         backgroundColor:'rgba(26,102,68,0.14)', borderColor:'#1A6644', borderWidth:2,
         pointBackgroundColor:'#1A6644', pointRadius:3, pointHoverRadius:4 },
-      { label:'Code-first', data:new Array(10).fill(2),
+      { label:'Code-first', data:new Array(11).fill(2),
         backgroundColor:'rgba(184,80,22,0.12)', borderColor:'#B85016', borderWidth:2,
         pointBackgroundColor:'#B85016', pointRadius:3, pointHoverRadius:4 }
     ]
@@ -858,7 +870,8 @@ function compute(){
     clamp(9.8-sN*5.5-tN*0.8),                        // 7. Finance ownership — sem-driven (drops at Hybrid/IT-Led)
     clamp(2.0+rN*1.0+T.d8boost),                     // 8. Enterprise data scale — tier-driven: PP~2, PBI~3.5, Fabric~9
     clamp(2.5+tN*0.3+rN*0.4+T.d9boost),             // 9. Cross-func breadth — tier-driven: PP~3, PBI~5.5, Fabric~8.5
-    clamp(2.5-sN*1.0)                                // 10. Incumbent IT influence — FOS always low (bypasses IT structurally); slight drop when org is IT-Led (FOS can't operate anyway)
+    clamp(2.5-sN*1.0),                               // 10. Incumbent IT influence — FOS always low (bypasses IT structurally); slight drop when org is IT-Led (FOS can't operate anyway)
+    clamp(9.5-sN*7.0)                                // 11. AI readiness — finance-owned semantic layer is the prerequisite for safe AI; drops sharply at Hybrid/IT-Led
   ];
 
   // ── Radar: Code-first ─────────────────────────────
@@ -873,10 +886,11 @@ function compute(){
     10,                                               // 8. Enterprise data scale — maxed: CF built for this by design
     10,                                               // 9. Cross-func breadth — maxed: CF built for this by design
     10,                                               // 10. Incumbent IT influence — maxed: CF IS the incumbent IT approach by definition
+    clamp(3.0+bN*2.0+rN*1.0)                         // 11. AI readiness — moderate; larger budgets can build clean surfaces, but distributed logic limits safety
   ];
 
-  const fosScore= sem>=4 ? 0 : Math.round(fd.reduce((a,b)=>a+b,0)/10/10*99);
-  const cfScore =Math.round(cd.reduce((a,b)=>a+b,0)/10/10*99);
+  const fosScore= sem>=4 ? 0 : Math.round(fd.reduce((a,b)=>a+b,0)/11/10*99);
+  const cfScore =Math.round(cd.reduce((a,b)=>a+b,0)/11/10*99);
 
   const fosWks=Math.max(2,Math.round(urg*0.25+(chaos-1)*0.3));
   const cfWks =Math.round(urg*1.4+chaos*1.5+3);
@@ -1087,7 +1101,7 @@ function update(){
   } else if(gap>35){
     bar.className='insight-bar green';
     ttl.textContent='Finance OS is the decisive fit for this company profile.';
-    txt.textContent=`At ${c.fosWks} weeks to first value, the code-first platform is frequently eliminated before the architecture conversation even starts — their ${c.cfWks}-week runway overshoots the urgency window. The code-first burden shows up as engineering-owned work, low finance ownership (${c.cfOwn}%), and ${fmtK(c.advK)} higher annual cost. Business logic in a finance-owned semantic model stays readable, auditable, and changeable by finance — not buried in SQL procedures that require a data engineer to modify.`;
+    txt.textContent=`At ${c.fosWks} weeks to first value, the code-first platform is frequently eliminated before the architecture conversation even starts — their ${c.cfWks}-week runway overshoots the urgency window. The code-first burden shows up as engineering-owned work, low finance ownership (${c.cfOwn}%), and ${fmtK(c.advK)} higher annual cost. Business logic in a finance-owned semantic model stays readable, auditable, and changeable by finance — not buried in SQL procedures that require a data engineer to modify. And critically: that same deterministic semantic layer is the prerequisite for safe AI in finance — AI-assisted reporting and forecasting is only trustworthy when AI can reason over meaning that finance owns and controls.`;
   } else if(gap>15){
     bar.className='insight-bar lean';
     ttl.textContent='Finance OS leads clearly — code-first is becoming credible at this scale.';
@@ -1303,7 +1317,7 @@ async function askAI(type, btn) {
 
     loading.style.display = 'none';
     respText.style.display= 'block';
-    respText.textContent  = text;
+    respText.innerHTML = (typeof marked !== 'undefined') ? marked.parse(text) : text.replace(/\n\n/g,'<br><br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
 
   } catch(err) {
     loading.style.display = 'none';
