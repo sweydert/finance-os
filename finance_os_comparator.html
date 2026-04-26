@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance OS vs. Code-First Platform — Fit Comparator</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --fos:       #1A6644;
+      --fos-light: #E9F5EE;
+      --fos-mid:   #BDE0CC;
+      --cf:        #B85016;
+      --cf-light:  #FBF0E8;
+      --cf-mid:    #F0C4A0;
+      --warn:      #92400E;
+      --warn-light:#FEF3C7;
+      --warn-mid:  #FCD34D;
+      --bg:        #EEEEE9;
+      --card:      #FFFFFF;
+      --border:    #E0E0D6;
+      --text:      #191A1C;
+      --sub:       #5C5C65;
+      --muted:     #96969E;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .widget { max-width: 940px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 22px 26px; }
+
+    .section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+    }
+
+    /* ── PROFILE GRID ─────────────────────────────────── */
+    .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+    .pc { background: #F6F6F2; border: 1px solid var(--border); border-radius: 8px; padding: 14px 15px; }
+
+    .pc-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+    .pc-value { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.15; }
+    .pc-value small { font-size: 14px; font-weight: 500; }
+    .pc-hint  { font-size: 10px; color: var(--muted); margin-bottom: 10px; line-height: 1.35; }
+    .pc-desc  { font-size: 10px; color: var(--muted); line-height: 1.4; }
+
+    /* semantic control cell — full width, warning-tinted when high */
+    .pc.sem-cell {
+      grid-column: 1 / -1;
+      background: #F6F6F2;
+      border-color: var(--border);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .pc.sem-cell.warn { background: var(--warn-light); border-color: var(--warn-mid); }
+    .pc.sem-cell.warn-red { background: #FEF2F2; border-color: #FCA5A5; }
+    .pc.sem-cell.warn .pc-label { color: var(--warn); }
+    .pc.sem-cell.warn-red .pc-label { color: #DC2626; }
+    .pc.sem-cell.warn .pc-desc { color: var(--warn); }
+    .pc.sem-cell.warn-red .pc-desc { color: #DC2626; }
+    .pc.sem-cell.warn .pc-label { color: var(--warn); }
+    .pc.sem-cell.warn .pc-desc  { color: var(--warn); }
+
+    .sem-inner { display: flex; align-items: center; gap: 20px; }
+    .sem-left  { flex-shrink: 0; min-width: 160px; }
+    .sem-right { flex: 1; }
+
+    input[type="range"] {
+      width: 100%; height: 4px; border-radius: 2px;
+      -webkit-appearance: none; appearance: none;
+      background: linear-gradient(to right, var(--fos) 0%, var(--fos) var(--pct,0%), #D4D4CC var(--pct,0%), #D4D4CC 100%);
+      cursor: pointer; outline: none; margin-bottom: 9px; display: block;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+      background: var(--fos); border: 2.5px solid #fff; box-shadow: 0 0 0 1.5px var(--fos); cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--fos); border: 2.5px solid #fff; box-shadow: 0 0 0 1.5px var(--fos); cursor: pointer;
+    }
+
+    .toggle-row { display: flex; gap: 5px; margin-bottom: 9px; }
+    .tog-btn {
+      flex: 1; padding: 6px 4px; font-size: 11px; font-weight: 700; font-family: inherit;
+      border: 1.5px solid #D4D4CC; border-radius: 5px; background: #fff; color: var(--muted);
+      cursor: pointer; text-align: center; transition: all 0.12s; white-space: nowrap;
+    }
+    .tog-btn.on { background: var(--fos); border-color: var(--fos); color: #fff; }
+
+    /* ── INCOMPATIBILITY WARNING ──────────────────────── */
+    .incompat-warn {
+      display: none;
+      background: var(--warn-light); border: 2px solid var(--warn-mid);
+      border-left: 5px solid var(--warn); border-radius: 10px; padding: 18px 22px;
+    }
+    .incompat-warn.show { display: block; }
+    .incompat-title { font-size: 13px; font-weight: 800; color: var(--warn); margin-bottom: 6px; }
+    .incompat-text  { font-size: 12.5px; color: #78350F; line-height: 1.7; }
+
+    /* ── TIER STRIP ───────────────────────────────────── */
+    .tier-strip { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .tier-strip-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .tier-btns { display: flex; gap: 8px; }
+    .tier-btn {
+      flex: 1; padding: 12px 14px; border: 1.5px solid #D4D4CC; border-radius: 8px;
+      background: #F6F6F2; cursor: pointer; font-family: inherit; text-align: left; transition: all 0.15s;
+    }
+    .tier-btn:hover { border-color: var(--fos); }
+    .tier-btn.on { background: var(--fos-light); border-color: var(--fos); }
+    .tier-btn-name { font-size: 12px; font-weight: 700; color: var(--sub); display: flex; align-items: center; gap: 6px; }
+    .tier-btn.on .tier-btn-name { color: var(--fos); }
+    .tier-dot { width: 7px; height: 7px; border-radius: 50%; background: #D4D4CC; flex-shrink: 0; }
+    .tier-btn.on .tier-dot { background: var(--fos); }
+
+    /* ── APPROACH ROW ─────────────────────────────────── */
+    .approach-row { display: grid; grid-template-columns: 1fr 44px 1fr; gap: 10px; align-items: center; }
+    .ap-card { border-radius: 10px; padding: 20px 22px; }
+    .ap-card.fos { background: var(--fos-light); border: 1.5px solid var(--fos-mid); }
+    .ap-card.cf  { background: var(--cf-light);  border: 1.5px solid var(--cf-mid); }
+    .ap-kicker { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+    .ap-name   { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+    .ap-sub    { font-size: 10px; color: var(--muted); margin-bottom: 16px; }
+    .ap-score-wrap { display: flex; align-items: baseline; gap: 5px; }
+    .ap-score  { font-size: 60px; font-weight: 500; line-height: 1; }
+    .ap-score.fos { color: var(--fos); }
+    .ap-score.cf  { color: var(--cf); }
+    .ap-denom  { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .vs-badge  { font-size: 16px; font-weight: 800; color: var(--muted); text-align: center; }
+
+    /* ── GRADUATION LADDER ────────────────────────────── */
+    .ladder-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; }
+    .ladder-row  { display: flex; align-items: stretch; gap: 0; margin-bottom: 14px; }
+    .ladder-tier { flex: 1; border: 1.5px solid #E0E0D6; border-radius: 8px; padding: 14px 15px; background: #F8F8F4; transition: all 0.2s; }
+    .ladder-tier.active { background: var(--fos-light); border-color: var(--fos); box-shadow: 0 0 0 2px rgba(26,102,68,0.1); }
+    .ladder-arrow { display: flex; align-items: center; justify-content: center; width: 38px; flex-shrink: 0; font-size: 20px; color: #C8C8C0; transition: color 0.2s; }
+    .ladder-arrow.lit { color: var(--fos); }
+    .lt-badge { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .lt-num { width: 18px; height: 18px; border-radius: 50%; background: #CACAC2; color: #fff; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+    .ladder-tier.active .lt-num  { background: var(--fos); }
+    .lt-name { font-size: 12px; font-weight: 800; color: var(--sub); }
+    .ladder-tier.active .lt-name { color: var(--fos); }
+    .lt-unlocks { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .lt-unlocks li { font-size: 10px; color: var(--sub); display: flex; gap: 5px; line-height: 1.35; }
+    .lt-unlocks li::before { content: '·'; color: #C0C0B8; flex-shrink: 0; }
+    .ladder-tier.active .lt-unlocks li { color: #2A5C3A; }
+    .ladder-tier.active .lt-unlocks li::before { color: var(--fos); }
+    .lt-chip { display: inline-block; font-size: 8px; font-weight: 700; background: #E6F5EE; color: var(--fos); border-radius: 3px; padding: 1px 4px; margin-left: 3px; }
+    .ladder-banner { background: linear-gradient(135deg,#EAF5EE 0%,#F3FAF6 100%); border: 1px solid var(--fos-mid); border-radius: 8px; padding: 12px 16px; }
+    .lb-text { font-size: 11.5px; color: #1F5A38; line-height: 1.6; }
+    .lb-text strong { font-weight: 700; }
+
+    /* ── MAIN ROW ─────────────────────────────────────── */
+    .main-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; }
+    .left-col  { display: flex; flex-direction: column; gap: 12px; }
+
+    .radar-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 18px 14px; flex: 1; }
+    .radar-legend { display: flex; gap: 14px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+    .leg-item { display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--sub); }
+    .leg-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .footnote { font-size: 9.5px; color: var(--muted); text-align: center; margin-top: 8px; line-height: 1.4; }
+
+    /* ── SPRINT FEE CARD ──────────────────────────────── */
+    .fee-card { background: var(--fos-light); border: 1px solid var(--fos-mid); border-radius: 10px; padding: 14px 18px; flex-shrink: 0; }
+    .fee-card .section-label { color: var(--fos); margin-bottom: 8px; }
+    .fee-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .fee-value { font-size: 28px; font-weight: 700; color: var(--fos); line-height: 1; }
+    .fee-drivers { font-size: 9px; color: #2D7F58; line-height: 1.6; text-align: right; max-width: 180px; }
+    .fee-override-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .fee-override-input {
+      font-family: inherit; font-size: 13px; font-weight: 700; color: var(--fos);
+      background: #fff; border: 1.5px solid var(--fos-mid); border-radius: 5px;
+      padding: 3px 8px; width: 90px; display: none;
+    }
+    .override-btn {
+      font-family: inherit; font-size: 9px; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; padding: 3px 9px; border-radius: 4px; cursor: pointer;
+      border: 1px solid var(--fos-mid); background: #fff; color: var(--fos); transition: all 0.12s;
+    }
+    .override-btn:hover { background: var(--fos); color: #fff; }
+    .override-btn.reset { border-color: var(--cf-mid); color: var(--cf); }
+    .override-btn.reset:hover { background: var(--cf); color: #fff; }
+
+    /* ── SUPPORT RETAINER CARD ────────────────────────── */
+    .retainer-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; }
+    .retainer-inner { display: flex; align-items: stretch; gap: 0; }
+    .retainer-monthly { flex: 1; padding-right: 20px; border-right: 1px solid var(--border); }
+    .retainer-annual  { flex: 1; padding-left: 20px; }
+    .retainer-val     { font-size: 28px; font-weight: 700; color: var(--fos); line-height: 1; margin-bottom: 3px; }
+    .retainer-sub     { font-size: 9.5px; color: var(--muted); margin-bottom: 8px; }
+    .retainer-drivers { font-size: 9px; color: #2D7F58; line-height: 1.55; }
+
+    /* ── METRICS COLUMN ───────────────────────────────── */
+    .metrics-col { display: flex; flex-direction: column; gap: 10px; }
+    .metrics-col .mc { flex: 1; }
+    .mc { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; }
+    .mc-label { font-size: 9px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .mc-vals  { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1px; }
+    .mc-fos   { font-size: 24px; font-weight: 800; color: var(--fos); }
+    .mc-cf    { font-size: 17px; font-weight: 700; color: var(--cf); text-align: right; }
+    .mc-subs  { display: flex; justify-content: space-between; margin-bottom: 7px; }
+    .mc-sub   { font-size: 9px; color: var(--muted); font-weight: 500; }
+    .mc-bars  { display: flex; flex-direction: column; gap: 3px; margin-bottom: 6px; }
+    .mc-stack-bar { height: 4px; border-radius: 2px; display: flex; overflow: hidden; gap: 1px; margin-bottom: 3px; }
+    .mc-stack-seg { height: 100%; transition: width 0.25s ease; }
+    .seg-fee      { background: var(--fos); }
+    .seg-platform { background: #2196A8; }
+    .seg-overhead { background: #9DC9B8; }
+    .mc-bar { height: 4px; border-radius: 2px; transition: width 0.25s ease; max-width: 100%; }
+    .mc-bar.fos { background: var(--fos); }
+    .mc-bar.cf  { background: var(--cf); }
+    .cost-breakdown { margin-top: 8px; padding-top: 8px; border-top: 1px solid #F0F0E9; display: flex; flex-direction: column; gap: 3px; }
+    .cbd-row   { display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
+    .cbd-label { display: flex; align-items: center; gap: 5px; color: var(--sub); }
+    .cbd-dot   { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+    .cbd-val   { font-weight: 700; color: var(--text); }
+    .adv-badge { display: inline-block; font-size: 10px; font-weight: 700; color: var(--fos); background: var(--fos-light); border: 1px solid var(--fos-mid); padding: 2px 9px; border-radius: 20px; margin-top: 6px; }
+
+    /* ── DEPLOYMENT TIMELINE ──────────────────────────── */
+    .tl-outer { position: relative; margin: 18px 0 8px; }
+    .tl-row   { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .tl-lbl   { width: 124px; flex-shrink: 0; font-size: 11px; font-weight: 600; color: var(--sub); }
+    .tl-track { flex: 1; height: 12px; position: relative; background: #EDEDE8; border-radius: 3px; }
+    .tl-seg   { position: absolute; top: 0; height: 100%; border-radius: 3px; transition: width 0.25s ease, left 0.25s ease; }
+    #urgency-vline { }
+    #urgency-vlabel { position: absolute; top: -22px; left: 5px; font-size: 9.5px; font-weight: 800; color: #D93025; white-space: nowrap; background: rgba(255,255,255,0.85); padding: 1px 4px; border-radius: 3px; }
+    .tl-axis  { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 5px; margin-left: 134px; }
+    .tl-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
+    .tll-item  { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--sub); }
+    .tll-sw    { width: 20px; height: 6px; border-radius: 2px; flex-shrink: 0; }
+
+    /* ── BUSINESS LOGIC TABLE ─────────────────────────── */
+    .biz-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .biz-table th { font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; padding: 0 14px 10px 0; border-bottom: 2px solid var(--border); }
+    .biz-table th.cat { color: var(--muted); width: 21%; }
+    .biz-table th.fth { color: var(--fos);   width: 39.5%; }
+    .biz-table th.cth { color: var(--cf);    width: 39.5%; }
+    .biz-table td { padding: 10px 14px 10px 0; vertical-align: top; border-bottom: 1px solid #F0F0E9; line-height: 1.45; }
+    .biz-table tr:last-child td { border-bottom: none; }
+    .biz-table td.cat-td { font-weight: 700; color: #333; }
+    .biz-table td.fos-td { color: var(--fos); font-weight: 500; }
+    .biz-table td.cf-td  { color: var(--cf);  font-weight: 500; }
+
+    /* ── INSIGHT BAR ──────────────────────────────────── */
+    .insight-bar { border-radius: 10px; padding: 18px 22px; border-left: 5px solid; }
+    .insight-bar.green { background: #EAF5EE; border-color: var(--fos); }
+    .insight-bar.amber { background: #FEF8EC; border-color: #CA8A04; }
+    .insight-bar.lean  { background: #EDF5F2; border-color: #2D7F58; }
+    .insight-title { font-size: 13px; font-weight: 800; margin-bottom: 5px; }
+    .insight-bar.green .insight-title { color: var(--fos); }
+    .insight-bar.amber .insight-title { color: #92400E; }
+    .insight-bar.lean  .insight-title { color: #2D7F58; }
+    .insight-text { font-size: 12.5px; color: #2E2E34; line-height: 1.7; }
+    .insight-note { font-size: 11px; color: #5A2475; margin-top: 11px; padding-top: 11px; border-top: 1px solid rgba(116,39,116,0.18); line-height: 1.65; display: none; }
+    .insight-note strong { font-weight: 700; }
+
+    /* ── DEEP DIVE BUTTONS ────────────────────────────── */
+    .dd-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .dd-btn { display: flex; align-items: flex-start; gap: 10px; padding: 14px 15px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-family: inherit; text-align: left; transition: border-color 0.15s, background 0.15s; }
+    .dd-btn:hover { border-color: var(--fos); background: var(--fos-light); }
+    .dd-btn:disabled { opacity:0.35; cursor:not-allowed; pointer-events:none; }
+    .dd-row.blocked .dd-btn { opacity:0.3; cursor:not-allowed; pointer-events:none; }
+    .dd-blocked-msg { display:none; background:#FEF2F2; border:1.5px solid #FCA5A5; border-left:5px solid #DC2626; border-radius:10px; padding:14px 20px; font-size:12.5px; color:#991B1B; line-height:1.6; }
+    .dd-blocked-msg.show { display:block; }
+    .dd-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+    .dd-text { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.4; }
+
+    /* AI response panel */
+    .ai-panel { display:none; background:#fff; border:1.5px solid var(--fos-mid); border-radius:10px; padding:20px 24px; margin-top:0; }
+    .ai-panel.show { display:block; }
+    .ai-panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .ai-panel-title { font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--fos); }
+    .ai-close-btn { font-family:inherit; font-size:11px; font-weight:700; color:var(--muted); background:none; border:1px solid var(--border); border-radius:5px; padding:3px 10px; cursor:pointer; }
+    .ai-close-btn:hover { color:var(--text); border-color:var(--sub); }
+    .ai-response { font-size:13px; line-height:1.75; color:#2E2E34; white-space:pre-wrap; }
+    .ai-loading { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12px; }
+    .ai-spinner { width:16px; height:16px; border:2px solid var(--fos-mid); border-top-color:var(--fos); border-radius:50%; animation:spin 0.8s linear infinite; flex-shrink:0; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── PROMPT MODAL ─────────────────────────────────── */
+    #prompt-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; }
+    #prompt-modal.show { display:flex; }
+  </style>
+</head>
+<body>
+<div class="widget">
+
+  <!-- ════════ COMPANY PROFILE ════════════════════════ -->
+  <div class="card">
+    <div class="section-label">Company Profile — Configure the Comparison</div>
+    <div class="profile-grid">
+
+      <div class="pc">
+        <div class="pc-label">Annual revenue</div>
+        <div class="pc-value" id="v-rev">$75M</div>
+        <div class="pc-hint">Target company size</div>
+        <input type="range" id="s-rev" min="50" max="1000" value="75" step="10">
+        <div class="pc-desc">Revenue scale affects platform overhead tolerance.</div>
+      </div>
+
+      <div class="pc">
+        <div class="pc-label">Urgency — weeks to first value</div>
+        <div class="pc-value" id="v-urg">12 <small>wks</small></div>
+        <div class="pc-hint">How long can you wait for first useful report?</div>
+        <input type="range" id="s-urg" min="4" max="52" value="12" step="1">
+        <div class="pc-desc">Urgency heavily favors finance-owned semantic build.</div>
+      </div>
+
+      <div class="pc">
+        <div class="pc-label">Data &amp; GL chaos level</div>
+        <div class="pc-value" id="v-chaos" style="font-size:18px;">Mixed systems</div>
+        <div class="pc-hint">1 = clean ERP · 5 = spreadsheet chaos</div>
+        <input type="range" id="s-chaos" min="1" max="5" value="3" step="1">
+        <div class="pc-desc">Higher chaos benefits semantic control tables + overrides.</div>
+      </div>
+
+      <div class="pc">
+        <div class="pc-label">Finance team size</div>
+        <div class="pc-value" id="v-team">5 <small>FTE</small></div>
+        <div class="pc-hint">Finance &amp; accounting headcount</div>
+        <input type="range" id="s-team" min="1" max="20" value="5" step="1">
+        <div class="pc-desc">Small teams need low-friction change cycles.</div>
+      </div>
+
+      <div class="pc">
+        <div class="pc-label">Annual BI / reporting budget</div>
+        <div class="pc-value" id="v-budget">$150K</div>
+        <div class="pc-hint">Total client BI budget (drives CF cost estimate)</div>
+        <input type="range" id="s-budget" min="50" max="1000" value="150" step="10">
+        <div class="pc-desc">Used to size the code-first platform cost comparison.</div>
+      </div>
+
+      <div class="pc">
+        <div class="pc-label">PE-backed or board-reported?</div>
+        <div class="pc-value" id="v-pe">Yes</div>
+        <div class="pc-hint">Affects cadence &amp; auditability needs</div>
+        <div class="toggle-row">
+          <button class="tog-btn on" id="btn-pe-yes" onclick="setPE(true)">PE / board</button>
+          <button class="tog-btn"    id="btn-pe-no"  onclick="setPE(false)">Owner-op</button>
+        </div>
+        <div class="pc-desc">Board cadence raises governance + reconciliation importance.</div>
+      </div>
+
+      <!-- SEMANTIC LAYER CONTROL — full width -->
+      <div class="pc sem-cell" id="sem-cell">
+        <div class="sem-inner">
+          <div class="sem-left">
+            <div class="pc-label">Finance control of semantic layer</div>
+            <div class="pc-value" id="v-sem" style="font-size:16px;">Finance-led</div>
+            <div class="pc-hint" style="margin-bottom:0;">Who defines, owns, and physically controls semantics (reporting meaning)?</div>
+          </div>
+          <div class="sem-right">
+            <div class="toggle-row" style="margin-bottom:6px;">
+              <button class="tog-btn on" id="btn-sem-finance" onclick="setSem(1)">Finance-Led</button>
+              <button class="tog-btn" id="btn-sem-hybrid" onclick="setSem(3)" style="border-color:#FCD34D;color:#92400E;">Hybrid</button>
+              <button class="tog-btn" id="btn-sem-it" onclick="setSem(5)" style="border-color:#E53E3E;color:#C53030;">IT-Led</button>
+            </div>
+            <div class="pc-desc" id="sem-desc">Finance controls all semantic logic — mapping tables, DAX measures, and overrides. Ideal fit for Finance OS.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Platform Tier -->
+    <div class="tier-strip">
+      <div class="tier-strip-label">Finance OS platform tier — select graduation stage</div>
+      <div class="tier-btns">
+        <button class="tier-btn on" id="tier-pp"  onclick="setTier('powerpivot')">
+          <div class="tier-btn-name"><div class="tier-dot"></div>PowerPivot</div>
+        </button>
+        <button class="tier-btn" id="tier-pbi" onclick="setTier('pbi')">
+          <div class="tier-btn-name"><div class="tier-dot"></div>Power BI</div>
+        </button>
+        <button class="tier-btn" id="tier-fab" onclick="setTier('fabric')">
+          <div class="tier-btn-name"><div class="tier-dot"></div>Microsoft Fabric</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ INCOMPATIBILITY WARNING ════════════════ -->
+  <div class="incompat-warn" id="incompat-warn">
+    <div class="incompat-title">⚠ Finance OS architecture is not the right fit for this profile.</div>
+    <div class="incompat-text" id="incompat-text"></div>
+  </div>
+
+  <!-- ════════ APPROACH SCORES ════════════════════════ -->
+  <div class="approach-row">
+    <div class="ap-card fos">
+      <div class="ap-kicker">Approach A</div>
+      <div class="ap-name">Finance OS architecture</div>
+      <div class="ap-sub" id="ap-fos-sub">PowerPivot · Excel · semantic models · finance-owned</div>
+      <div class="ap-score-wrap">
+        <span class="ap-score fos" id="fos-score">94</span>
+        <span class="ap-denom">fit score / 99</span>
+      </div>
+    </div>
+    <div class="vs-badge">vs</div>
+    <div class="ap-card cf">
+      <div class="ap-kicker">Approach B</div>
+      <div class="ap-name">Code-first data platform</div>
+      <div class="ap-sub">Databricks · DBT · SQL pipelines · IT/engineering-owned</div>
+      <div class="ap-score-wrap">
+        <span class="ap-score cf" id="cf-score">22</span>
+        <span class="ap-denom">fit score / 99</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ GRADUATION LADDER ══════════════════════ -->
+  <div class="ladder-card">
+    <div class="section-label">Finance OS graduation path — how the semantic model scales</div>
+    <div class="ladder-row">
+
+      <div class="ladder-tier active" id="lt-pp">
+        <div class="lt-badge"><div class="lt-num">1</div><div class="lt-name">PowerPivot</div></div>
+        <ul class="lt-unlocks">
+          <li>GL-native semantic model in Excel</li>
+          <li>Full 3-statement reporting: P&amp;L, B/S, cash flow</li>
+          <li>Mapping, fact, dim &amp; override tables</li>
+          <li>Finance SME edits model directly — no IT ticket</li>
+          <li>Reconcilable to source at every row</li>
+        </ul>
+      </div>
+
+      <div class="ladder-arrow" id="la-1">→</div>
+
+      <div class="ladder-tier" id="lt-pbi">
+        <div class="lt-badge"><div class="lt-num">2</div><div class="lt-name">Power BI</div></div>
+        <ul class="lt-unlocks">
+          <li>Everything in PowerPivot tier, plus:</li>
+          <li>Org-wide report sharing &amp; publishing <span class="lt-chip">NEW</span></li>
+          <li>Row-level security &amp; access governance <span class="lt-chip">NEW</span></li>
+          <li>Scheduled refresh &amp; data gateway <span class="lt-chip">NEW</span></li>
+          <li>Mobile access &amp; embedded reports <span class="lt-chip">NEW</span></li>
+        </ul>
+      </div>
+
+      <div class="ladder-arrow" id="la-2">→</div>
+
+      <div class="ladder-tier" id="lt-fab">
+        <div class="lt-badge"><div class="lt-num">3</div><div class="lt-name">Microsoft Fabric</div></div>
+        <ul class="lt-unlocks">
+          <li>Everything in Power BI tier, plus:</li>
+          <li>OneLake unified enterprise data store <span class="lt-chip">NEW</span></li>
+          <li>Real-time analytics &amp; event streams <span class="lt-chip">NEW</span></li>
+          <li>Enterprise governance &amp; data lineage <span class="lt-chip">NEW</span></li>
+          <li>Cross-org data sharing at scale <span class="lt-chip">NEW</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ladder-banner">
+      <div class="lb-text">
+        <strong>Finance owns the semantic layer at every tier.</strong>
+        Mapping tables, DAX measures, override logic, and 3-statement structure remain in finance hands —
+        not buried in engineering pipelines. Graduating from PowerPivot to Fabric adds platform capability
+        and enterprise scale without transferring model ownership to IT or a data engineering team.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ RADAR (left) + METRICS (right) ═════════ -->
+  <div class="main-row">
+
+    <div class="left-col">
+
+      <div class="radar-card">
+        <div class="section-label">10-Dimension Fit Profile</div>
+        <canvas id="radarChart"></canvas>
+        <div class="radar-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:var(--fos)"></div>Finance OS architecture</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--cf)"></div>Code-first data platform</div>
+        </div>
+        <div class="footnote">† At Fabric tier, Finance OS reaches near-parity with code-first on enterprise data scale for finance's core needs. ‡ Incumbent IT influence reflects organisational inertia favouring existing IT-owned data stacks — the primary real-world driver of code-first adoption in finance.</div>
+      </div>
+
+      <!-- SPRINT FEE CARD — computed output -->
+      <div class="fee-card">
+        <div class="section-label">WBI sprint engagement fee — estimated</div>
+        <div class="fee-top">
+          <div>
+            <div class="fee-value" id="v-sprint-fee">$110K</div>
+            <div style="font-size:9px;color:#2D7F58;margin-top:3px;">Value-based · outcome-priced</div>
+          </div>
+          <div class="fee-drivers" id="fee-drivers">
+            Urgency · revenue scale<br>GL complexity · PE governance
+          </div>
+        </div>
+        <div class="fee-override-row">
+          <input type="number" id="sprint-fee-input" class="fee-override-input" min="10" max="999" step="5">
+          <button class="override-btn" id="sprint-override-btn" onclick="toggleSprintOverride()">Override</button>
+          <span style="font-size:9px;color:var(--muted);" id="sprint-override-hint">Calculated from profile</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: metric cards -->
+    <div class="metrics-col">
+
+      <div class="mc">
+        <div class="mc-label">Weeks to first useful report</div>
+        <div class="mc-vals">
+          <div class="mc-fos" id="m-fos-wks">3 wks</div>
+          <div class="mc-cf"  id="m-cf-wks">21 wks</div>
+        </div>
+        <div class="mc-subs"><span class="mc-sub">Finance OS</span><span class="mc-sub">Code-first</span></div>
+        <div class="mc-bars">
+          <div class="mc-bar fos" id="mb-fos-wks" style="width:14%"></div>
+          <div class="mc-bar cf"  id="mb-cf-wks"  style="width:100%"></div>
+        </div>
+      </div>
+
+      <div class="mc">
+        <div class="mc-label">Estimated annual total cost</div>
+        <div class="mc-vals">
+          <div class="mc-fos" id="m-fos-cost">$107K</div>
+          <div class="mc-cf"  id="m-cf-cost">$557K</div>
+        </div>
+        <div class="mc-subs"><span class="mc-sub">Finance OS (total)</span><span class="mc-sub">Code-first (total)</span></div>
+        <div class="mc-stack-bar">
+          <div class="mc-stack-seg seg-fee"      id="seg-fee"      style="width:70%"></div>
+          <div class="mc-stack-seg seg-platform"  id="seg-platform"  style="width:0%"></div>
+          <div class="mc-stack-seg seg-overhead"  id="seg-overhead"  style="width:30%"></div>
+        </div>
+        <div class="mc-bars">
+          <div class="mc-bar cf" id="mb-cf-cost" style="width:100%"></div>
+        </div>
+        <div class="cost-breakdown">
+          <div class="cbd-row">
+            <div class="cbd-label"><div class="cbd-dot" style="background:var(--fos)"></div>WBI sprint fee</div>
+            <div class="cbd-val" id="cbd-fee">$110K</div>
+          </div>
+          <div class="cbd-row">
+            <div class="cbd-label"><div class="cbd-dot" style="background:#2196A8"></div>Microsoft licensing &amp; admin</div>
+            <div class="cbd-val" id="cbd-platform">$0</div>
+          </div>
+          <div class="cbd-row">
+            <div class="cbd-label"><div class="cbd-dot" style="background:#9DC9B8"></div>Client overhead (team + data complexity)</div>
+            <div class="cbd-val" id="cbd-overhead">$29K</div>
+          </div>
+        </div>
+        <div class="adv-badge" id="m-adv">$450K advantage</div>
+      </div>
+
+      <div class="mc">
+        <div class="mc-label">Finance team ownership of model</div>
+        <div class="mc-vals">
+          <div class="mc-fos" id="m-fos-own">89%</div>
+          <div class="mc-cf"  id="m-cf-own">10%</div>
+        </div>
+        <div class="mc-subs"><span class="mc-sub">Finance OS</span><span class="mc-sub">Code-first</span></div>
+        <div class="mc-bars">
+          <div class="mc-bar fos" id="mb-fos-own" style="width:89%"></div>
+          <div class="mc-bar cf"  id="mb-cf-own"  style="width:10%"></div>
+        </div>
+      </div>
+
+      <div class="mc">
+        <div class="mc-label">Days to iterate a meaningful change</div>
+        <div class="mc-vals">
+          <div class="mc-fos" id="m-fos-days">2 days</div>
+          <div class="mc-cf"  id="m-cf-days">22 days</div>
+        </div>
+        <div class="mc-subs"><span class="mc-sub">Finance OS</span><span class="mc-sub">Code-first</span></div>
+        <div class="mc-bars">
+          <div class="mc-bar fos" id="mb-fos-days" style="width:9%"></div>
+          <div class="mc-bar cf"  id="mb-cf-days"  style="width:100%"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ SUPPORT RETAINER CARD ══════════════════ -->
+  <div class="retainer-card">
+    <div class="section-label" style="margin-bottom:14px;">WBI ongoing support retainer — estimated</div>
+    <div class="retainer-inner">
+      <div class="retainer-monthly">
+        <div class="retainer-val" id="v-retainer-monthly">$2.9K</div>
+        <div class="retainer-sub">per month</div>
+        <div class="retainer-drivers" id="retainer-drivers">Driven by team size, GL complexity &amp; platform tier. Subject to override for significant re-engineering.</div>
+        <div class="fee-override-row" style="margin-top:8px;">
+          <input type="number" id="retainer-input" class="fee-override-input" min="1" max="50" step="0.5">
+          <button class="override-btn" id="retainer-override-btn" onclick="toggleRetainerOverride()">Override</button>
+          <span style="font-size:9px;color:var(--muted);" id="retainer-override-hint">Monthly K · calculated from profile</span>
+        </div>
+      </div>
+      <div class="retainer-annual">
+        <div class="retainer-val" id="v-retainer-annual">$35K</div>
+        <div class="retainer-sub">per year (annualised)</div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid #F0F0E9;">
+          <div style="font-size:9px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">What's included</div>
+          <div style="font-size:10px;color:var(--sub);line-height:1.7;">
+            · Model maintenance &amp; override table updates<br>
+            · New entity &amp; cost centre onboarding<br>
+            · Board pack production support<br>
+            · Scenario &amp; assumption updates<br>
+            · Platform tier admin coordination
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ DEPLOYMENT TIMELINE ════════════════════ -->
+  <div class="card">
+    <div class="section-label">Deployment Timeline — Weeks from Engagement Start</div>
+    <div class="tl-outer" id="tl-outer">
+      <div class="tl-row">
+        <div class="tl-lbl">Finance OS</div>
+        <div class="tl-track" id="tl-fos-track"><div class="tl-seg" id="tl-fos-a" style="left:0;width:6%;background:rgba(26,102,68,0.35)"></div>
+          <div class="tl-seg" id="tl-fos-b" style="background:#1A6644"></div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-lbl">Code-first platform</div>
+        <div class="tl-track">
+          <div class="tl-seg" id="tl-cf-a" style="left:0;width:30%;background:rgba(184,80,22,0.35)"></div>
+          <div class="tl-seg" id="tl-cf-b" style="background:#B85016"></div>
+        </div>
+      </div>
+          <div id="urgency-vline" style="position:absolute;top:0;height:100%;width:2px;background:#D93025;pointer-events:none;left:calc(134px + (100% - 134px) * 12 / 52);"><div id="urgency-vlabel" style="position:absolute;top:-22px;left:4px;font-size:9.5px;font-weight:800;color:#D93025;white-space:nowrap;background:rgba(255,255,255,0.85);padding:1px 3px;border-radius:3px;">| Urgency: <span id="urgency-wks-label">12 wks</span></div></div>
+    </div>
+    <div style="font-size:9px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-left:134px;margin-bottom:2px;">Wks</div><div class="tl-axis"><span style="left:0%">0</span><span style="left:12.5%">6.5</span><span style="left:25%">13</span><span style="left:37.5%">19.5</span><span style="left:50%">26</span><span style="left:62.5%">32.5</span><span style="left:75%">39</span><span style="left:87.5%">45.5</span><span style="left:100%">52</span></div>
+    <div class="tl-legend">
+      <div class="tll-item"><div class="tll-sw" style="background:rgba(26,102,68,0.35)"></div>First useful report</div>
+      <div class="tll-item"><div class="tll-sw" style="background:#1A6644"></div>Full solution live</div>
+      <div class="tll-item"><div class="tll-sw" style="background:rgba(184,80,22,0.35)"></div>Code-first first report</div>
+      <div class="tll-item"><div class="tll-sw" style="background:#B85016"></div>Code-first full solution</div>
+      <div class="tll-item" style="color:#D93025;font-weight:700">| Your urgency window</div>
+    </div>
+  </div>
+
+  <!-- ════════ BUSINESS LOGIC TABLE ═══════════════════ -->
+  <div class="card">
+    <div class="section-label">Where Business Logic Lives — The Hidden Differentiator</div>
+    <table class="biz-table">
+      <thead>
+        <tr>
+          <th class="cat">Business Logic Location</th>
+          <th class="fth">Finance OS</th>
+          <th class="cth">Code-First</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cat-td">Business logic location</td>
+          <td class="fos-td">DAX measures in semantic model — auditable, version-controlled, finance-readable</td>
+          <td class="cf-td">Distributed across SQL/DBT/procs/scripts — opaque to finance</td>
+        </tr>
+        <tr>
+          <td class="cat-td">3-statement model support</td>
+          <td class="fos-td">Native — P&amp;L, balance sheet, cash flow linked in semantic model</td>
+          <td class="cf-td">Requires embedded finance SME logic; structurally wrong place</td>
+        </tr>
+        <tr>
+          <td class="cat-td">Finance SME requirement</td>
+          <td class="fos-td">Finance edits mapping tables, overrides, scenarios directly</td>
+          <td class="cf-td">Tickets and backlog — engineering must implement meaning</td>
+        </tr>
+        <tr>
+          <td class="cat-td">GL debit/credit foundation</td>
+          <td class="fos-td">Connects direct to GL — mapping / fact / dim / override tables built on accounting truth</td>
+          <td class="cf-td">ETL layers often reshape meaning before finance can validate</td>
+        </tr>
+        <tr>
+          <td class="cat-td">Reconciliability</td>
+          <td class="fos-td">Designed for tie-out to source and audit trails</td>
+          <td class="cf-td">Frequent "numbers finance can't reconcile" outcomes</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ════════ INSIGHT BAR ═════════════════════════════ -->
+  <div class="insight-bar green" id="insight-bar">
+    <div class="insight-title" id="insight-title">Finance OS is the decisive fit for this company profile.</div>
+    <div class="insight-text"  id="insight-text">Loading…</div>
+    <div class="insight-note"  id="insight-note"></div>
+  </div>
+
+  <!-- ════════ DEEP DIVE BUTTONS ══════════════════════ -->
+  <div class="dd-row">
+    <button class="dd-btn" id="dd-cfo" onclick="askAI('cfo',this)">
+      <span class="dd-icon">💬</span>
+      <div>
+        <div class="dd-text">Common CFO questions</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:2px;">Tailored to this profile</div>
+      </div>
+    </button>
+    <button class="dd-btn" id="dd-engagement" onclick="askAI('engagement',this)">
+      <span class="dd-icon">📋</span>
+      <div>
+        <div class="dd-text">Engagement structure end to end</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:2px;">Sprint + retainer roadmap</div>
+      </div>
+    </button>
+    <button class="dd-btn" id="dd-engineering" onclick="askAI('engineering',this)">
+      <span class="dd-icon">🛡️</span>
+      <div>
+        <div class="dd-text">Common data engineering objections</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:2px;">With counter-arguments</div>
+      </div>
+    </button>
+  </div>
+
+  <!-- BLOCKED MESSAGE -->
+  <div class="dd-blocked-msg" id="dd-blocked-msg">
+    <strong>These tools are not available when IT-Led is selected.</strong> WBI Consulting is not the right partner for organisations where IT controls the semantic layer. The Finance OS approach requires finance to own and directly access the semantic model — if that condition cannot be met, there is no engagement to structure and no objections to counter. Please revisit the Finance Control of Semantic Layer setting if this selection was made in error.
+  </div>
+
+  <!-- AI RESPONSE PANEL -->
+  <div class="ai-panel" id="ai-panel">
+    <div class="ai-panel-header">
+      <div class="ai-panel-title" id="ai-panel-title">Response</div>
+      <button class="ai-close-btn" onclick="closeAI()">✕ Close</button>
+    </div>
+    <div id="ai-response-area">
+      <div class="ai-loading" id="ai-loading">
+        <div class="ai-spinner"></div>
+        <span>Generating response tailored to this profile…</span>
+      </div>
+      <div class="ai-response" id="ai-response-text" style="display:none;"></div>
+    </div>
+  </div>
+
+</div><!-- end .widget -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const S = {
+  rev:75, urg:12, chaos:3, team:5, budget:150, pe:true,
+  tier:'powerpivot', sem:1,
+  sprintOverride: null,   // null = calculated, number = override value ($K)
+  retainerOverride: null  // null = calculated, number = override value ($K/month)
+};
+
+// ═══════════════════════════════════════════════════════════
+// TIER DEFINITIONS
+// ═══════════════════════════════════════════════════════════
+const TIER_DEF = {
+  powerpivot: { sub:'PowerPivot · Excel · semantic models · finance-owned',    d8boost:0,   d9boost:0,   ownMod:0,  retainerTier:0    },
+  pbi:        { sub:'Power BI Pro/PPU · semantic models · finance-owned',      d8boost:1.5, d9boost:1.5, ownMod:0,  retainerTier:0.8  },
+  fabric:     { sub:'Microsoft Fabric · Power BI · OneLake · finance-owned',   d8boost:5.5, d9boost:5.8, ownMod:0,  retainerTier:2.0  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// SEMANTIC LAYER LABELS
+// ═══════════════════════════════════════════════════════════
+const SEM_LBL  = ['','Finance-Led','Finance-Led','Hybrid','IT-Led','IT-Led'];
+const SEM_DESC = [
+  '',
+  'Finance directly controls all semantic logic — mapping tables, DAX measures, and overrides. No IT involvement in semantic decisions. Ideal fit for Finance OS.',
+  'Finance directly controls all semantic logic — mapping tables, DAX measures, and overrides. No IT involvement in semantic decisions. Ideal fit for Finance OS.',
+  'IT owns infrastructure and pipelines; finance claims semantic authority but executes through IT requests. Finance may believe it owns meaning — but if a ticket is required to change a mapping table, it does not. Yellow flag: Finance OS can succeed here only with an explicit division-of-authority agreement executed before engagement begins.',
+  'IT or data engineering fully controls semantic logic. Finance OS cannot operate in this environment. There must never be a path to meaning that runs through an IT ticket. Hard stop.',
+  'IT or data engineering fully controls semantic logic. Finance OS cannot operate in this environment. There must never be a path to meaning that runs through an IT ticket. Hard stop.'
+];
+
+const CHAOS_LBL = ['','Clean ERP','Mostly clean','Mixed systems','Messy data','Spreadsheet chaos'];
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function clamp(v,lo=0,hi=10){ return Math.max(lo,Math.min(hi,v)); }
+function fmtRev(v)    { return v>=1000?'$1.0B':'$'+v+'M'; }
+function fmtBudget(v) { return v>=1000?'$1.0M':'$'+v+'K'; }
+function fmtK(k) {
+  if(k<0) return '-$'+Math.round(-k)+'K';
+  if(k>=1000) return '$'+(k/1000).toFixed(1)+'M';
+  return '$'+Math.round(k)+'K';
+}
+function slideFill(el){
+  const pct=((+el.value-+el.min)/(+el.max-+el.min)*100).toFixed(1)+'%';
+  el.style.setProperty('--pct',pct);
+}
+
+// ═══════════════════════════════════════════════════════════
+// RADAR
+// ═══════════════════════════════════════════════════════════
+const RADAR_LABELS = [
+  'Speed to value','Maintenance simplicity','Iteration agility',
+  'Cost efficiency','Logic transparency','Financial sophistication',
+  'Finance ownership','Enterprise data scale †','Cross-func breadth †',
+  'Incumbent IT influence ‡'
+];
+
+const radarChart = new Chart(document.getElementById('radarChart').getContext('2d'),{
+  type:'radar',
+  data:{
+    labels:RADAR_LABELS,
+    datasets:[
+      { label:'Finance OS', data:new Array(10).fill(8),
+        backgroundColor:'rgba(26,102,68,0.14)', borderColor:'#1A6644', borderWidth:2,
+        pointBackgroundColor:'#1A6644', pointRadius:3, pointHoverRadius:4 },
+      { label:'Code-first', data:new Array(10).fill(2),
+        backgroundColor:'rgba(184,80,22,0.12)', borderColor:'#B85016', borderWidth:2,
+        pointBackgroundColor:'#B85016', pointRadius:3, pointHoverRadius:4 }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:true,
+    scales:{ r:{ min:0, max:10,
+      ticks:{stepSize:2,display:false},
+      grid:{color:'rgba(0,0,0,0.07)'},
+      angleLines:{color:'rgba(0,0,0,0.07)'},
+      pointLabels:{font:{size:10,family:"'DM Sans',sans-serif",weight:'500'},color:'#5C5C65',padding:5}
+    }},
+    plugins:{legend:{display:false},tooltip:{enabled:true}}
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// COMPUTE
+// ═══════════════════════════════════════════════════════════
+function compute(){
+  const {rev,urg,chaos,team,budget,pe,tier,sem}=S;
+  const T=TIER_DEF[tier];
+  const rN=(rev-50)/950, uN=(urg-4)/48, cN=(chaos-1)/4;
+  const tN=(team-1)/19,  bN=(budget-50)/950, pN=pe?1:0;
+  const sN=(sem-1)/4;  // semantic control: 0=finance-led, 1=IT-controlled
+
+  // urgency factor for fee: lower urg = higher urgency = higher fee
+  const urgFactor=(52-urg)/48;
+
+  // ── Sprint fee (computed) ──────────────────────────
+  const sprintFeeCalc = Math.round(110 + 60*urgFactor + 40*rN + 20*cN + 15*pN);
+  const sprintFeeK = S.sprintOverride !== null ? S.sprintOverride : sprintFeeCalc;
+
+  // ── Support retainer (computed) ───────────────────
+  const retainerCalcMonthly = Math.round((2.5 + (team-1)*0.12 + (chaos-1)*0.35 + T.retainerTier)*10)/10;
+  const retainerMonthlyK = S.retainerOverride !== null ? S.retainerOverride : retainerCalcMonthly;
+  const retainerAnnualK  = Math.round(retainerMonthlyK*12);
+
+  // ── Radar: Finance OS ──────────────────────────────
+  const fd=[
+    clamp(10.0-uN*2.5),                              // 1. Speed to value — urgency-driven
+    clamp(9.8+cN*0.2),                               // 2. Maintenance simplicity — chaos favours FOS
+    clamp(9.7-tN*1.5-bN*0.5),                        // 3. Iteration agility — small teams, lean budget
+    clamp(9.9-bN*0.8-(sprintFeeK-10)/290*1.5),       // 4. Cost efficiency — fee + budget aware
+    clamp(9.5+pN*0.5),                               // 5. Logic transparency — PE governance
+    clamp(9.6+pN*0.4),                               // 6. Financial sophistication — PE + chaos
+    clamp(9.8-sN*5.5-tN*0.8),                        // 7. Finance ownership — sem-driven (drops at Hybrid/IT-Led)
+    clamp(2.0+rN*1.0+T.d8boost),                     // 8. Enterprise data scale — tier-driven: PP~2, PBI~3.5, Fabric~9
+    clamp(2.5+tN*0.3+rN*0.4+T.d9boost),             // 9. Cross-func breadth — tier-driven: PP~3, PBI~5.5, Fabric~8.5
+    clamp(2.5-sN*1.0)                                // 10. Incumbent IT influence — FOS always low (bypasses IT structurally); slight drop when org is IT-Led (FOS can't operate anyway)
+  ];
+
+  // ── Radar: Code-first ─────────────────────────────
+  const cd=[
+    clamp(1.5+uN*3.5),                               // 1. Speed to value — slow; slightly better with long runway
+    clamp(2.5+(1-cN)*2.5),                           // 2. Maintenance simplicity — better with clean data
+    clamp(2.0+tN*2.0+bN*2.0),                        // 3. Iteration agility — needs big team + big budget
+    clamp(1.0+bN*4.5),                               // 4. Cost efficiency — budget-heavy
+    clamp(2.0+(1-pN)*1.5),                           // 5. Logic transparency — opaque; better without PE scrutiny
+    clamp(1.0+bN*2.0+(1-cN)*1.5),                   // 6. Financial sophistication — needs budget + clean data
+    clamp(1.0+tN*1.5-sN*0.5),                        // 7. Finance ownership — always low; slightly worse at IT-Led (IT owns everything)
+    10,                                               // 8. Enterprise data scale — maxed: CF built for this by design
+    10,                                               // 9. Cross-func breadth — maxed: CF built for this by design
+    10,                                               // 10. Incumbent IT influence — maxed: CF IS the incumbent IT approach by definition
+  ];
+
+  const fosScore= sem>=4 ? 0 : Math.round(fd.reduce((a,b)=>a+b,0)/10/10*99);
+  const cfScore =Math.round(cd.reduce((a,b)=>a+b,0)/10/10*99);
+
+  const fosWks=Math.max(2,Math.round(urg*0.25+(chaos-1)*0.3));
+  const cfWks =Math.round(urg*1.4+chaos*1.5+3);
+
+  let platformK=0;
+  if(tier==='pbi')    platformK=Math.round(team*0.12+5+9);
+  else if(tier==='fabric') platformK=102;
+
+  const overheadK=Math.round(team*2+chaos*3+10);
+  const fosCostK=sprintFeeK+platformK+overheadK;
+  const cfCostK =Math.round(budget*0.5+10.643*Math.sqrt(budget)+chaos*12+urg*3+280);
+  const advK=cfCostK-fosCostK;
+
+  const fosOwn=Math.min(100,Math.max(10,Math.round(100-chaos*3-tN*8-sN*40+T.ownMod)));
+  const cfOwn =Math.max(5,Math.round(14-pN*4+tN*4+sN*20));
+
+  const fosDays=Math.max(14,Math.round(14+(chaos-1)*3));
+  const cfDays =Math.max(60,Math.round(60+team*2+chaos*4));
+
+  const fosFirstPct =Math.min(100,fosWks/52*100);
+  const fosTotalPct =Math.min(100,fosWks*2.8/52*100);
+  const fosSecondPct=fosTotalPct-fosFirstPct;
+  const cfFirstPct  =Math.min(100,cfWks*0.72/52*100);
+  const cfTotalPct  =Math.min(100,cfWks*1.65/52*100);
+  const cfSecondPct =cfTotalPct-cfFirstPct;
+  const urgPct=urg/52*100;
+
+  return {
+    fd,cd,fosScore,cfScore,fosWks,cfWks,
+    sprintFeeK,sprintFeeCalc,
+    retainerMonthlyK,retainerCalcMonthly,retainerAnnualK,
+    fosCostK,cfCostK,advK,platformK,overheadK,
+    fosOwn,cfOwn,fosDays,cfDays,
+    fosFirstPct,fosSecondPct,cfFirstPct,cfSecondPct,urgPct
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// UPDATE
+// ═══════════════════════════════════════════════════════════
+function update(){
+  const {rev,urg,chaos,team,budget,pe,tier,sem}=S;
+  const c=compute(); const T=TIER_DEF[tier];
+
+  // Profile labels
+  document.getElementById('v-rev').innerHTML     =fmtRev(rev);
+  document.getElementById('v-urg').innerHTML     =urg+' <small>wks</small>';
+  document.getElementById('v-chaos').textContent =CHAOS_LBL[chaos];
+  document.getElementById('v-team').innerHTML    =team+' <small>FTE</small>';
+  document.getElementById('v-budget').textContent=fmtBudget(budget);
+  document.getElementById('v-pe').textContent    =pe?'Yes':'No';
+
+  // Semantic control
+  document.getElementById('v-sem').textContent   =SEM_LBL[sem];
+  document.getElementById('sem-desc').textContent=SEM_DESC[sem];
+  const semCell=document.getElementById('sem-cell');
+  semCell.classList.remove('warn','warn-red');
+  if(sem===3) semCell.classList.add('warn');
+  if(sem>=4)  semCell.classList.add('warn-red');
+
+  // Block AI buttons when IT-Led
+  const ddRow     = document.querySelector('.dd-row');
+  const blockedMsg= document.getElementById('dd-blocked-msg');
+  const aiPanel   = document.getElementById('ai-panel');
+  if(sem>=4){
+    ddRow.classList.add('blocked');
+    blockedMsg.classList.add('show');
+    aiPanel.classList.remove('show');
+    if(currentActiveBtn){ currentActiveBtn.style.borderColor=''; currentActiveBtn.style.background=''; currentActiveBtn=null; }
+  } else {
+    ddRow.classList.remove('blocked');
+    blockedMsg.classList.remove('show');
+  }
+
+  // Incompatibility warning
+  const incompatWarn=document.getElementById('incompat-warn');
+  const incompatText=document.getElementById('incompat-text');
+  if(sem>=3){
+    incompatWarn.classList.add('show');
+    if(sem===3){
+      incompatWarn.style.borderLeftColor='#F59E0B';
+      incompatWarn.style.background='#FFFBEB';
+      incompatText.innerHTML='<strong>Governance gap detected.</strong> Finance may claim semantic ownership, but if IT must execute that authority — even a single mapping table change requires a ticket — finance does not actually own meaning. Finance OS can succeed in this configuration <em>only</em> with a formal division-of-authority agreement executed before engagement begins: finance defines semantics, IT plumbs pipes, and no semantic change ever routes through a helpdesk. This is a yellow signal, not a hard stop — but it must be resolved before sprint work commences.';
+      document.querySelector('#incompat-warn .incompat-title').textContent = '⚠ Governance gap — semantic authority without semantic control.';
+    } else {
+      incompatWarn.style.borderLeftColor='#DC2626';
+      incompatWarn.style.background='#FEF2F2';
+      incompatText.textContent='IT or data engineering fully controls the semantic layer in this organisation. Finance OS architecture is not appropriate here. The Finance OS approach is predicated on finance owning and directly accessing the semantic model — if engineering defines meaning, finance consumes outputs, not truth. There must never be a path to meaning that runs through an IT ticket. WBI Consulting is not the right partner for this configuration.';
+      document.querySelector('#incompat-warn .incompat-title').textContent = '⛔ Finance OS is not the right fit — semantic layer ownership is a hard requirement.';
+    }
+  } else {
+    incompatWarn.classList.remove('show');
+  }
+
+  // Approach subtitle & scores
+  document.getElementById('ap-fos-sub').textContent=T.sub;
+  document.getElementById('fos-score').textContent=c.fosScore;
+  document.getElementById('cf-score').textContent =c.cfScore;
+
+  // Approach A card background — red when IT-Led
+  const apFosCard = document.querySelector('.ap-card.fos');
+  if(sem>=4){
+    apFosCard.style.background='#FEF2F2';
+    apFosCard.style.borderColor='#FCA5A5';
+  } else {
+    apFosCard.style.background='';
+    apFosCard.style.borderColor='';
+  }
+
+  // Radar
+  radarChart.data.datasets[0].data=c.fd;
+  radarChart.data.datasets[1].data=c.cd;
+  radarChart.update('none');
+
+  // Ladder
+  const tm={powerpivot:'lt-pp',pbi:'lt-pbi',fabric:'lt-fab'};
+  ['lt-pp','lt-pbi','lt-fab'].forEach(id=>document.getElementById(id).classList.toggle('active',tm[tier]===id));
+  document.getElementById('la-1').classList.toggle('lit',tier==='pbi'||tier==='fabric');
+  document.getElementById('la-2').classList.toggle('lit',tier==='fabric');
+
+  // Sprint fee card
+  if(S.sprintOverride===null){
+    document.getElementById('v-sprint-fee').textContent='$'+c.sprintFeeK+'K';
+    document.getElementById('fee-drivers').innerHTML=
+      `Urgency: ${urg} wks · ${fmtRev(rev)} revenue<br>${CHAOS_LBL[chaos]} · ${pe?'PE-backed':'Owner-op'}`;
+    document.getElementById('sprint-override-hint').textContent='Calculated from profile';
+  }
+
+  // Support retainer card
+  if(S.retainerOverride===null){
+    document.getElementById('v-retainer-monthly').textContent='$'+c.retainerMonthlyK.toFixed(1)+'K';
+    document.getElementById('v-retainer-annual').textContent ='$'+c.retainerAnnualK+'K';
+    document.getElementById('retainer-override-hint').textContent='Monthly K · calculated from profile';
+  } else {
+    document.getElementById('v-retainer-annual').textContent='$'+Math.round(S.retainerOverride*12)+'K';
+  }
+
+  // Metrics: Weeks
+  document.getElementById('m-fos-wks').textContent=c.fosWks+' wks';
+  document.getElementById('m-cf-wks').textContent =c.cfWks+' wks';
+  const maxW=Math.max(c.fosWks,c.cfWks);
+  document.getElementById('mb-fos-wks').style.width=(c.fosWks/maxW*100)+'%';
+  document.getElementById('mb-cf-wks').style.width='100%';
+
+  // Metrics: Cost
+  document.getElementById('m-fos-cost').textContent=fmtK(c.fosCostK);
+  document.getElementById('m-cf-cost').textContent =fmtK(c.cfCostK);
+  document.getElementById('m-adv').textContent     =fmtK(c.advK)+' advantage';
+  const barMax=Math.max(c.fosCostK,c.cfCostK);
+  document.getElementById('seg-fee').style.width     =(c.sprintFeeK/barMax*100).toFixed(1)+'%';
+  document.getElementById('seg-platform').style.width=(c.platformK/barMax*100).toFixed(1)+'%';
+  document.getElementById('seg-overhead').style.width=(c.overheadK/barMax*100).toFixed(1)+'%';
+  document.getElementById('mb-cf-cost').style.width  =(c.cfCostK/barMax*100).toFixed(1)+'%';
+  document.getElementById('cbd-fee').textContent     ='$'+c.sprintFeeK+'K';
+  document.getElementById('cbd-platform').textContent=c.platformK>0?fmtK(c.platformK):'$0';
+  document.getElementById('cbd-overhead').textContent=fmtK(c.overheadK);
+
+  // Metrics: Ownership
+  document.getElementById('m-fos-own').textContent =c.fosOwn+'%';
+  document.getElementById('m-cf-own').textContent  =c.cfOwn+'%';
+  document.getElementById('mb-fos-own').style.width=c.fosOwn+'%';
+  document.getElementById('mb-cf-own').style.width =c.cfOwn+'%';
+
+  // Metrics: Days
+  const fDay=c.fosDays,cDay=c.cfDays;
+  document.getElementById('m-fos-days').textContent=fDay+(fDay===1?' day':' days');
+  document.getElementById('m-cf-days').textContent =cDay+' days';
+  const maxD=Math.max(fDay,cDay);
+  document.getElementById('mb-fos-days').style.width=(fDay/maxD*100)+'%';
+  document.getElementById('mb-cf-days').style.width='100%';
+
+  // Timeline
+  document.getElementById('tl-fos-a').style.width=c.fosFirstPct.toFixed(1)+'%';
+  document.getElementById('tl-fos-b').style.left =c.fosFirstPct.toFixed(1)+'%';
+  document.getElementById('tl-fos-b').style.width=Math.max(0,c.fosSecondPct).toFixed(1)+'%';
+  document.getElementById('tl-cf-a').style.width =c.cfFirstPct.toFixed(1)+'%';
+  document.getElementById('tl-cf-b').style.left  =c.cfFirstPct.toFixed(1)+'%';
+  document.getElementById('tl-cf-b').style.width =Math.max(0,c.cfSecondPct).toFixed(1)+'%';
+
+  requestAnimationFrame(()=>{
+    const track = document.getElementById('tl-fos-track');
+    const outer = document.getElementById('tl-outer');
+    const tr = track.getBoundingClientRect();
+    const or = outer.getBoundingClientRect();
+    const lx = (tr.left - or.left) + tr.width * (S.urg / 52);
+    const vl = document.getElementById('urgency-vline');
+    vl.style.display = 'block';
+    vl.style.left    = lx + 'px';
+    vl.style.height = outer.offsetHeight + 'px';
+    document.getElementById('urgency-wks-label').textContent = S.urg + ' wks';
+  });
+
+  // Insight bar
+  const gap=c.fosScore-c.cfScore;
+  const bar=document.getElementById('insight-bar');
+  const ttl=document.getElementById('insight-title');
+  const txt=document.getElementById('insight-text');
+  const note=document.getElementById('insight-note');
+
+  if(sem===3){
+    bar.className='insight-bar amber';
+    ttl.textContent='Governance gap — Finance OS possible but requires a division-of-authority agreement first.';
+    txt.textContent='Finance may claim semantic ownership but if IT must execute that authority, finance does not truly own meaning. Finance OS can work in this configuration only if a formal agreement is in place before sprint work begins: finance defines semantics, IT plumbs pipes, and no mapping change ever routes through a helpdesk ticket.';
+  } else if(sem>=4){
+    bar.className='insight-bar amber';
+    ttl.textContent='Finance OS is not the right fit — semantic layer ownership is the hard requirement.';
+    txt.textContent='Finance OS architecture is predicated on finance owning the semantic layer directly. If IT or data engineering controls how meaning is assigned to debits and credits, the model cannot be auditable, reconcilable, or finance-changeable. Regardless of other profile factors, this is a hard stop. The client should resolve governance before engaging.';
+  } else if(gap>35){
+    bar.className='insight-bar green';
+    ttl.textContent='Finance OS is the decisive fit for this company profile.';
+    txt.textContent=`At ${c.fosWks} weeks to first value, the code-first platform is frequently eliminated before the architecture conversation even starts — their ${c.cfWks}-week runway overshoots the urgency window. The code-first burden shows up as engineering-owned work, low finance ownership (${c.cfOwn}%), and ${fmtK(c.advK)} higher annual cost. Business logic in a finance-owned semantic model stays readable, auditable, and changeable by finance — not buried in SQL procedures that require a data engineer to modify.`;
+  } else if(gap>15){
+    bar.className='insight-bar lean';
+    ttl.textContent='Finance OS leads clearly — code-first is becoming credible at this scale.';
+    txt.textContent=`This profile still favours Finance OS on speed (${c.fosWks} vs ${c.cfWks} weeks), cost efficiency (${fmtK(c.advK)} annual advantage), and finance ownership (${c.fosOwn}% vs ${c.cfOwn}%). However, at this revenue scale and budget level, a code-first platform earns consideration if enterprise data integration — not financial reporting — is the stated priority.`;
+  } else {
+    bar.className='insight-bar amber';
+    ttl.textContent='Genuine toss-up — platform choice depends on strategic priority.';
+    txt.textContent=`At this company profile, both platforms score competitively. Finance OS still leads on reconcilability, finance ownership, and time-to-first-value (${c.fosWks} vs ${c.cfWks} weeks). Code-first leads on enterprise data scale and cross-functional breadth. The decision hinges on whether financial reporting or data-engineering scale is the primary deliverable.`;
+  }
+
+  if(tier==='fabric'&&sem<4){
+    const revLabel=rev>=1000?'$1B+':'$'+rev+'M';
+    note.innerHTML=`<strong>Note on infrastructure overlap at this scale:</strong> At Fabric tier and ${revLabel} revenue, code-first platforms like Databricks operate in similar infrastructure territory to Microsoft Fabric. For finance's core needs — debits, credits, and 3-statement reporting — Fabric is at near-parity. The critical difference remains model ownership: Finance OS on Fabric keeps DAX measures, mapping tables, and override logic in finance hands. Databricks and DBT cannot make that claim.`;
+    note.style.display='block';
+  } else { note.style.display='none'; }
+
+  document.querySelectorAll('input[type="range"]').forEach(slideFill);
+}
+
+// ═══════════════════════════════════════════════════════════
+// OVERRIDE TOGGLES
+// ═══════════════════════════════════════════════════════════
+function toggleSprintOverride(){
+  const input=document.getElementById('sprint-fee-input');
+  const btn  =document.getElementById('sprint-override-btn');
+  const hint =document.getElementById('sprint-override-hint');
+  const val  =document.getElementById('v-sprint-fee');
+
+  if(S.sprintOverride===null){
+    // Enter override mode
+    const calc=compute().sprintFeeCalc;
+    S.sprintOverride=calc;
+    input.value=calc;
+    input.style.display='inline-block';
+    btn.textContent='Reset'; btn.classList.add('reset');
+    hint.textContent='Override active';
+    val.textContent='$'+calc+'K';
+    input.oninput=()=>{ S.sprintOverride=+input.value; val.textContent='$'+input.value+'K'; update(); };
+    input.focus();
+  } else {
+    // Reset to calculated
+    S.sprintOverride=null;
+    input.style.display='none';
+    btn.textContent='Override'; btn.classList.remove('reset');
+    hint.textContent='Calculated from profile';
+    update();
+  }
+}
+
+function toggleRetainerOverride(){
+  const input=document.getElementById('retainer-input');
+  const btn  =document.getElementById('retainer-override-btn');
+  const hint =document.getElementById('retainer-override-hint');
+  const val  =document.getElementById('v-retainer-monthly');
+
+  if(S.retainerOverride===null){
+    const calc=compute().retainerCalcMonthly;
+    S.retainerOverride=calc;
+    input.value=calc;
+    input.style.display='inline-block';
+    btn.textContent='Reset'; btn.classList.add('reset');
+    hint.textContent='Override active';
+    val.textContent='$'+calc+'K';
+    input.oninput=()=>{
+      S.retainerOverride=+input.value;
+      val.textContent='$'+input.value+'K';
+      document.getElementById('v-retainer-annual').textContent='$'+Math.round(+input.value*12)+'K';
+    };
+    input.focus();
+  } else {
+    S.retainerOverride=null;
+    input.style.display='none';
+    btn.textContent='Override'; btn.classList.remove('reset');
+    hint.textContent='Monthly K · calculated from profile';
+    update();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════════════════
+document.getElementById('s-rev').addEventListener('input',   e=>{S.rev   =+e.target.value;update();});
+document.getElementById('s-urg').addEventListener('input',   e=>{S.urg   =+e.target.value;update();});
+document.getElementById('s-chaos').addEventListener('input', e=>{S.chaos =+e.target.value;update();});
+document.getElementById('s-team').addEventListener('input',  e=>{S.team  =+e.target.value;update();});
+document.getElementById('s-budget').addEventListener('input',e=>{S.budget=+e.target.value;update();});
+
+
+function setSem(val){
+  S.sem=val;
+  const finBtn    = document.getElementById('btn-sem-finance');
+  const hybridBtn = document.getElementById('btn-sem-hybrid');
+  const itBtn     = document.getElementById('btn-sem-it');
+
+  // Reset all to neutral
+  finBtn.className    = 'tog-btn';
+  finBtn.style.cssText = '';
+  hybridBtn.className = 'tog-btn';
+  hybridBtn.style.cssText = '';
+  itBtn.className     = 'tog-btn';
+  itBtn.style.cssText = '';
+
+  if(val===1){
+    // Finance-Led — green active
+    finBtn.className = 'tog-btn on';
+  } else if(val===3){
+    // Hybrid — amber active, clearly distinct
+    hybridBtn.style.background    = '#F59E0B';
+    hybridBtn.style.borderColor   = '#D97706';
+    hybridBtn.style.color         = '#fff';
+    hybridBtn.style.fontWeight    = '700';
+  } else {
+    // IT-Led — red active, clearly distinct
+    itBtn.style.background  = '#DC2626';
+    itBtn.style.borderColor = '#B91C1C';
+    itBtn.style.color       = '#fff';
+    itBtn.style.fontWeight  = '700';
+  }
+  update();
+}
+
+function setPE(val){
+  S.pe=val;
+  document.getElementById('btn-pe-yes').className='tog-btn'+(val?' on':'');
+  document.getElementById('btn-pe-no').className ='tog-btn'+(!val?' on':'');
+  update();
+}
+
+function setTier(val){
+  S.tier=val;
+  const m={powerpivot:'tier-pp',pbi:'tier-pbi',fabric:'tier-fab'};
+  ['tier-pp','tier-pbi','tier-fab'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById(m[val]).classList.add('on');
+  update();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DEEP DIVE PROMPTS
+// ═══════════════════════════════════════════════════════════
+function buildPrompt(type){
+  const {rev,urg,chaos,team,budget,pe,tier,sem}=S;
+  const c=compute();
+  const CHAOS_DESC=['','a clean ERP','mostly clean data','mixed systems','messy data','spreadsheet chaos'];
+  const profile=`Company profile: ${fmtRev(rev)} revenue, ${urg}-week urgency window, ${CHAOS_DESC[chaos]}, ${team}-person finance team, ${pe?'PE-backed / board-reported':'owner-operated'}, Finance OS platform tier: ${tier==='powerpivot'?'PowerPivot':tier==='pbi'?'Power BI':'Microsoft Fabric'}, Semantic layer control: ${SEM_LBL[sem]}. Finance OS fit score: ${c.fosScore}/99. Code-first fit score: ${c.cfScore}/99. Weeks to first report: Finance OS ${c.fosWks} wks vs code-first ${c.cfWks} wks. Estimated sprint fee: $${c.sprintFeeK}K. Annual support retainer: $${c.retainerAnnualK}K. Annual cost: Finance OS $${c.fosCostK}K vs code-first $${c.cfCostK}K (${fmtK(c.advK)} Finance OS advantage).`;
+
+  if(type==='cfo'){
+    return `${profile}\n\nBased on this specific company profile, what are the most common questions a CFO or PE operating partner would ask when evaluating Finance OS architecture versus a code-first data platform? For each question, provide the most persuasive and accurate answer. Focus on financial reconcilability, time to first value, cost transparency, and finance team ownership of the semantic model.`;
+  } else if(type==='engagement'){
+    return `${profile}\n\nWalk me through the end-to-end engagement structure for implementing Finance OS architecture for this specific company — from first discovery call through full 3-statement reporting in ${tier==='powerpivot'?'PowerPivot/Excel':tier==='pbi'?'Power BI':'Microsoft Fabric'}. Include sprint phase milestones, deliverables, timeline, ongoing support retainer structure, and how to manage PE board reporting cadence throughout.`;
+  } else {
+    return `${profile}\n\nWhat are the most common objections and questions that data engineering teams raise when evaluating Finance OS architecture versus their preferred code-first approach? For each objection, provide the most technically credible counter-argument. Include the semantic layer ownership argument — that data engineers can own the facts (debits and credits) but must never define or assign meaning to those facts. That role belongs exclusively to finance.`;
+  }
+}
+
+const PANEL_TITLES = {
+  cfo:        'Common CFO questions — tailored to this profile',
+  engagement: 'Engagement structure — sprint + retainer roadmap',
+  engineering:'Data engineering objections + counter-arguments'
+};
+
+let currentActiveBtn = null;
+
+async function askAI(type, btn) {
+  // Toggle off if same button clicked again
+  if(currentActiveBtn === btn && document.getElementById('ai-panel').classList.contains('show')){
+    closeAI(); return;
+  }
+
+  // Visual: deactivate previous, activate current
+  if(currentActiveBtn) currentActiveBtn.style.borderColor='';
+  currentActiveBtn = btn;
+  btn.style.borderColor = 'var(--fos)';
+  btn.style.background  = 'var(--fos-light)';
+
+  // Show panel in loading state
+  const panel    = document.getElementById('ai-panel');
+  const titleEl  = document.getElementById('ai-panel-title');
+  const loading  = document.getElementById('ai-loading');
+  const respText = document.getElementById('ai-response-text');
+
+  titleEl.textContent   = PANEL_TITLES[type];
+  loading.style.display = 'flex';
+  respText.style.display= 'none';
+  respText.textContent  = '';
+  panel.classList.add('show');
+  panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+  // If sendPrompt available, use it (Claude.ai native)
+  if(typeof sendPrompt === 'function'){
+    sendPrompt(buildPrompt(type));
+    loading.style.display='none';
+    respText.style.display='block';
+    respText.textContent='Response sent to chat above ↑';
+    return;
+  }
+
+  // Otherwise call Anthropic API directly
+  try {
+    const response = await fetch('https://wbi-proxy.sweydert.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: buildPrompt(type) }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content && data.content[0] && data.content[0].text
+      ? data.content[0].text
+      : 'No response received. Please try again.';
+
+    loading.style.display = 'none';
+    respText.style.display= 'block';
+    respText.textContent  = text;
+
+  } catch(err) {
+    loading.style.display = 'none';
+    respText.style.display= 'block';
+    respText.textContent  = 'Error: ' + err.message + ' — Check browser console (F12) for details.';
+  }
+}
+
+function closeAI(){
+  document.getElementById('ai-panel').classList.remove('show');
+  if(currentActiveBtn){
+    currentActiveBtn.style.borderColor='';
+    currentActiveBtn.style.background='';
+    currentActiveBtn = null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('input[type="range"]').forEach(slideFill);
+update();
+</script>
+</body>
+</html>
