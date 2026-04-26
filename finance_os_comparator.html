@@ -1242,6 +1242,23 @@ function buildPrompt(type){
   }
 }
 
+function renderMarkdown(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^### (.+)$/gm, '<h4 style="font-size:12px;font-weight:800;color:var(--fos);margin:14px 0 4px;">$1</h4>')
+    .replace(/^## (.+)$/gm,  '<h3 style="font-size:13px;font-weight:800;color:var(--fos);margin:16px 0 5px;">$1</h3>')
+    .replace(/^# (.+)$/gm,   '<h2 style="font-size:14px;font-weight:800;color:var(--text);margin:0 0 12px;">$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,    '<em>$1</em>')
+    .replace(/^- (.+)$/gm,   '<div style="display:flex;gap:6px;margin:3px 0;"><span style="color:var(--fos);flex-shrink:0;">·</span><span>$1</span></div>')
+    .replace(/^---$/gm,      '<hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">')
+    .replace(/
+
+/g,        '<br><br>')
+    .replace(/
+/g,          '<br>');
+}
+
 const PANEL_TITLES = {
   cfo:        'Common CFO questions — tailored to this profile',
   engagement: 'Engagement structure — sprint + retainer roadmap',
@@ -1303,7 +1320,7 @@ async function askAI(type, btn) {
 
     loading.style.display = 'none';
     respText.style.display= 'block';
-    respText.textContent  = text;
+    respText.innerHTML    = renderMarkdown(text);
 
   } catch(err) {
     loading.style.display = 'none';
