@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- saved from url=(0060)file:///C:/Users/USER/Downloads/finance_os_comparator_2.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Finance OS vs. Code-First Platform — Fit Comparator</title>
-  <link href="./Finance OS vs. Code-First Platform — Fit Comparator_files/css2" rel="stylesheet">
-  <script src="./Finance OS vs. Code-First Platform — Fit Comparator_files/chart.umd.min.js.download"></script>
-  <script src="./Finance OS vs. Code-First Platform — Fit Comparator_files/marked.min.js.download"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -331,7 +331,7 @@
         <div class="pc-label">Annual revenue</div>
         <div class="pc-value" id="v-rev">$75M</div>
         <div class="pc-hint">Target company size</div>
-        <input type="range" id="s-rev" min="50" max="1000" value="75" step="10" style="--pct: 3.2%;">
+        <input type="range" id="s-rev" min="50" max="1000" value="75" step="10">
         <div class="pc-desc">Revenue scale affects platform overhead tolerance.</div>
       </div>
 
@@ -339,7 +339,7 @@
         <div class="pc-label">Urgency — weeks to first value</div>
         <div class="pc-value" id="v-urg">12 <small>wks</small></div>
         <div class="pc-hint">How long can you wait for first useful report?</div>
-        <input type="range" id="s-urg" min="4" max="52" value="12" step="1" style="--pct: 16.7%;">
+        <input type="range" id="s-urg" min="4" max="52" value="12" step="1">
         <div class="pc-desc">Urgency heavily favors finance-owned semantic build.</div>
       </div>
 
@@ -347,7 +347,7 @@
         <div class="pc-label">Data &amp; GL chaos level</div>
         <div class="pc-value" id="v-chaos" style="font-size:18px;">Mixed systems</div>
         <div class="pc-hint">1 = clean ERP · 5 = spreadsheet chaos</div>
-        <input type="range" id="s-chaos" min="1" max="5" value="3" step="1" style="--pct: 50.0%;">
+        <input type="range" id="s-chaos" min="1" max="5" value="3" step="1">
         <div class="pc-desc">Higher chaos benefits semantic control tables + overrides.</div>
       </div>
 
@@ -355,7 +355,7 @@
         <div class="pc-label">Finance team size</div>
         <div class="pc-value" id="v-team">5 <small>FTE</small></div>
         <div class="pc-hint">Finance &amp; accounting headcount</div>
-        <input type="range" id="s-team" min="1" max="20" value="5" step="1" style="--pct: 21.1%;">
+        <input type="range" id="s-team" min="1" max="20" value="5" step="1">
         <div class="pc-desc">Small teams need low-friction change cycles.</div>
       </div>
 
@@ -363,7 +363,7 @@
         <div class="pc-label">Annual BI / reporting budget</div>
         <div class="pc-value" id="v-budget">$150K</div>
         <div class="pc-hint">Total client BI budget (drives CF cost estimate)</div>
-        <input type="range" id="s-budget" min="50" max="1000" value="150" step="10" style="--pct: 10.5%;">
+        <input type="range" id="s-budget" min="50" max="1000" value="150" step="10">
         <div class="pc-desc">Used to size the code-first platform cost comparison.</div>
       </div>
 
@@ -373,7 +373,7 @@
         <div class="pc-hint">Affects cadence &amp; auditability needs</div>
         <div class="toggle-row">
           <button class="tog-btn on" id="btn-pe-yes" onclick="setPE(true)">PE / board</button>
-          <button class="tog-btn" id="btn-pe-no" onclick="setPE(false)">Owner-op</button>
+          <button class="tog-btn"    id="btn-pe-no"  onclick="setPE(false)">Owner-op</button>
         </div>
         <div class="pc-desc">Board cadence raises governance + reconciliation importance.</div>
       </div>
@@ -383,7 +383,7 @@
         <div class="sem-inner">
           <div class="sem-left">
             <div class="pc-label">Finance control of semantic layer</div>
-            <div class="pc-value" id="v-sem" style="font-size:16px;">Finance-Led</div>
+            <div class="pc-value" id="v-sem" style="font-size:16px;">Finance-led</div>
             <div class="pc-hint" style="margin-bottom:0;">Who defines, owns, and physically controls semantics (reporting meaning)?</div>
           </div>
           <div class="sem-right">
@@ -392,7 +392,7 @@
               <button class="tog-btn" id="btn-sem-hybrid" onclick="setSem(3)" style="border-color:#FCD34D;color:#92400E;">Hybrid</button>
               <button class="tog-btn" id="btn-sem-it" onclick="setSem(5)" style="border-color:#E53E3E;color:#C53030;">IT-Led</button>
             </div>
-            <div class="pc-desc" id="sem-desc">Finance directly controls all semantic logic — mapping tables, DAX measures, and overrides. No IT involvement in semantic decisions. Ideal fit for Finance OS.</div>
+            <div class="pc-desc" id="sem-desc">Finance controls all semantic logic — mapping tables, DAX measures, and overrides. Ideal fit for Finance OS.</div>
           </div>
         </div>
       </div>
@@ -403,13 +403,13 @@
     <div class="tier-strip">
       <div class="tier-strip-label">Finance OS platform tier — select graduation stage</div>
       <div class="tier-btns">
-        <button class="tier-btn on" id="tier-pp" onclick="setTier(&#39;powerpivot&#39;)">
+        <button class="tier-btn on" id="tier-pp"  onclick="setTier('powerpivot')">
           <div class="tier-btn-name"><div class="tier-dot"></div>PowerPivot</div>
         </button>
-        <button class="tier-btn" id="tier-pbi" onclick="setTier(&#39;pbi&#39;)">
+        <button class="tier-btn" id="tier-pbi" onclick="setTier('pbi')">
           <div class="tier-btn-name"><div class="tier-dot"></div>Power BI</div>
         </button>
-        <button class="tier-btn" id="tier-fab" onclick="setTier(&#39;fabric&#39;)">
+        <button class="tier-btn" id="tier-fab" onclick="setTier('fabric')">
           <div class="tier-btn-name"><div class="tier-dot"></div>Microsoft Fabric</div>
         </button>
       </div>
@@ -429,7 +429,7 @@
       <div class="ap-name">Finance OS architecture</div>
       <div class="ap-sub" id="ap-fos-sub">PowerPivot · Excel · semantic models · finance-owned</div>
       <div class="ap-score-wrap">
-        <span class="ap-score fos" id="fos-score">76</span>
+        <span class="ap-score fos" id="fos-score">94</span>
         <span class="ap-denom">fit score / 99</span>
       </div>
     </div>
@@ -439,7 +439,7 @@
       <div class="ap-name">Code-first data platform</div>
       <div class="ap-sub">Databricks · DBT · SQL pipelines · IT/engineering-owned</div>
       <div class="ap-score-wrap">
-        <span class="ap-score cf" id="cf-score">44</span>
+        <span class="ap-score cf" id="cf-score">22</span>
         <span class="ap-denom">fit score / 99</span>
       </div>
     </div>
@@ -505,7 +505,7 @@
 
       <div class="radar-card">
         <div class="section-label">11-Dimension Fit Profile</div>
-        <canvas id="radarChart" width="426" height="426" style="display: block; box-sizing: border-box; height: 426px; width: 426px;"></canvas>
+        <canvas id="radarChart"></canvas>
         <div class="radar-legend">
           <div class="leg-item"><div class="leg-dot" style="background:var(--fos)"></div>Finance OS architecture</div>
           <div class="leg-item"><div class="leg-dot" style="background:var(--cf)"></div>Code-first data platform</div>
@@ -518,10 +518,12 @@
         <div class="section-label">WBI sprint engagement fee — estimated</div>
         <div class="fee-top">
           <div>
-            <div class="fee-value" id="v-sprint-fee">$186K</div>
+            <div class="fee-value" id="v-sprint-fee">$110K</div>
             <div style="font-size:9px;color:#2D7F58;margin-top:3px;">Value-based · outcome-priced</div>
           </div>
-          <div class="fee-drivers" id="fee-drivers">Urgency: 12 wks · $75M revenue<br>Mixed systems · PE-backed</div>
+          <div class="fee-drivers" id="fee-drivers">
+            Urgency · revenue scale<br>GL complexity · PE governance
+          </div>
         </div>
         <div class="fee-override-row">
           <input type="number" id="sprint-fee-input" class="fee-override-input" min="10" max="999" step="5">
@@ -538,27 +540,27 @@
       <div class="mc">
         <div class="mc-label">Weeks to first useful report</div>
         <div class="mc-vals">
-          <div class="mc-fos" id="m-fos-wks">4 wks</div>
-          <div class="mc-cf" id="m-cf-wks">24 wks</div>
+          <div class="mc-fos" id="m-fos-wks">3 wks</div>
+          <div class="mc-cf"  id="m-cf-wks">21 wks</div>
         </div>
         <div class="mc-subs"><span class="mc-sub">Finance OS</span><span class="mc-sub">Code-first</span></div>
         <div class="mc-bars">
-          <div class="mc-bar fos" id="mb-fos-wks" style="width: 16.6667%;"></div>
-          <div class="mc-bar cf" id="mb-cf-wks" style="width:100%"></div>
+          <div class="mc-bar fos" id="mb-fos-wks" style="width:14%"></div>
+          <div class="mc-bar cf"  id="mb-cf-wks"  style="width:100%"></div>
         </div>
       </div>
 
       <div class="mc">
         <div class="mc-label">Estimated annual total cost</div>
         <div class="mc-vals">
-          <div class="mc-fos" id="m-fos-cost">$215K</div>
-          <div class="mc-cf" id="m-cf-cost">$557K</div>
+          <div class="mc-fos" id="m-fos-cost">$107K</div>
+          <div class="mc-cf"  id="m-cf-cost">$557K</div>
         </div>
         <div class="mc-subs"><span class="mc-sub">Finance OS (total)</span><span class="mc-sub">Code-first (total)</span></div>
         <div class="mc-stack-bar">
-          <div class="mc-stack-seg seg-fee" id="seg-fee" style="width: 33.4%;"></div>
-          <div class="mc-stack-seg seg-platform" id="seg-platform" style="width:0%"></div>
-          <div class="mc-stack-seg seg-overhead" id="seg-overhead" style="width: 5.2%;"></div>
+          <div class="mc-stack-seg seg-fee"      id="seg-fee"      style="width:70%"></div>
+          <div class="mc-stack-seg seg-platform"  id="seg-platform"  style="width:0%"></div>
+          <div class="mc-stack-seg seg-overhead"  id="seg-overhead"  style="width:30%"></div>
         </div>
         <div class="mc-bars">
           <div class="mc-bar cf" id="mb-cf-cost" style="width:100%"></div>
@@ -566,7 +568,7 @@
         <div class="cost-breakdown">
           <div class="cbd-row">
             <div class="cbd-label"><div class="cbd-dot" style="background:var(--fos)"></div>WBI sprint fee</div>
-            <div class="cbd-val" id="cbd-fee">$186K</div>
+            <div class="cbd-val" id="cbd-fee">$110K</div>
           </div>
           <div class="cbd-row">
             <div class="cbd-label"><div class="cbd-dot" style="background:#2196A8"></div>Microsoft licensing &amp; admin</div>
@@ -577,32 +579,32 @@
             <div class="cbd-val" id="cbd-overhead">$29K</div>
           </div>
         </div>
-        <div class="adv-badge" id="m-adv">$342K advantage</div>
+        <div class="adv-badge" id="m-adv">$450K advantage</div>
       </div>
 
       <div class="mc">
         <div class="mc-label">Finance team ownership of model</div>
         <div class="mc-vals">
           <div class="mc-fos" id="m-fos-own">89%</div>
-          <div class="mc-cf" id="m-cf-own">11%</div>
+          <div class="mc-cf"  id="m-cf-own">10%</div>
         </div>
         <div class="mc-subs"><span class="mc-sub">Finance OS</span><span class="mc-sub">Code-first</span></div>
         <div class="mc-bars">
           <div class="mc-bar fos" id="mb-fos-own" style="width:89%"></div>
-          <div class="mc-bar cf" id="mb-cf-own" style="width: 11%;"></div>
+          <div class="mc-bar cf"  id="mb-cf-own"  style="width:10%"></div>
         </div>
       </div>
 
       <div class="mc">
         <div class="mc-label">Days to iterate a meaningful change</div>
         <div class="mc-vals">
-          <div class="mc-fos" id="m-fos-days">20 days</div>
-          <div class="mc-cf" id="m-cf-days">82 days</div>
+          <div class="mc-fos" id="m-fos-days">2 days</div>
+          <div class="mc-cf"  id="m-cf-days">22 days</div>
         </div>
         <div class="mc-subs"><span class="mc-sub">Finance OS</span><span class="mc-sub">Code-first</span></div>
         <div class="mc-bars">
-          <div class="mc-bar fos" id="mb-fos-days" style="width: 24.3902%;"></div>
-          <div class="mc-bar cf" id="mb-cf-days" style="width:100%"></div>
+          <div class="mc-bar fos" id="mb-fos-days" style="width:9%"></div>
+          <div class="mc-bar cf"  id="mb-cf-days"  style="width:100%"></div>
         </div>
       </div>
 
@@ -614,7 +616,7 @@
     <div class="section-label" style="margin-bottom:14px;">WBI ongoing support retainer — estimated</div>
     <div class="retainer-inner">
       <div class="retainer-monthly">
-        <div class="retainer-val" id="v-retainer-monthly">$3.7K</div>
+        <div class="retainer-val" id="v-retainer-monthly">$2.9K</div>
         <div class="retainer-sub">per month</div>
         <div class="retainer-drivers" id="retainer-drivers">Driven by team size, GL complexity &amp; platform tier. Subject to override for significant re-engineering.</div>
         <div class="fee-override-row" style="margin-top:8px;">
@@ -624,7 +626,7 @@
         </div>
       </div>
       <div class="retainer-annual">
-        <div class="retainer-val" id="v-retainer-annual">$44K</div>
+        <div class="retainer-val" id="v-retainer-annual">$35K</div>
         <div class="retainer-sub">per year (annualised)</div>
         <div style="margin-top:10px;padding-top:10px;border-top:1px solid #F0F0E9;">
           <div style="font-size:9px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">What's included</div>
@@ -646,18 +648,18 @@
     <div class="tl-outer" id="tl-outer">
       <div class="tl-row">
         <div class="tl-lbl">Finance OS</div>
-        <div class="tl-track" id="tl-fos-track"><div class="tl-seg" id="tl-fos-a" style="left: 0px; width: 7.7%; background: rgba(26, 102, 68, 0.35);"></div>
-          <div class="tl-seg" id="tl-fos-b" style="background: rgb(26, 102, 68); left: 7.7%; width: 13.8%;"></div>
+        <div class="tl-track" id="tl-fos-track"><div class="tl-seg" id="tl-fos-a" style="left:0;width:6%;background:rgba(26,102,68,0.35)"></div>
+          <div class="tl-seg" id="tl-fos-b" style="background:#1A6644"></div>
         </div>
       </div>
       <div class="tl-row">
         <div class="tl-lbl">Code-first platform</div>
         <div class="tl-track">
-          <div class="tl-seg" id="tl-cf-a" style="left: 0px; width: 33.2%; background: rgba(184, 80, 22, 0.35);"></div>
-          <div class="tl-seg" id="tl-cf-b" style="background: rgb(184, 80, 22); left: 33.2%; width: 42.9%;"></div>
+          <div class="tl-seg" id="tl-cf-a" style="left:0;width:30%;background:rgba(184,80,22,0.35)"></div>
+          <div class="tl-seg" id="tl-cf-b" style="background:#B85016"></div>
         </div>
       </div>
-          <div id="urgency-vline" style="position: absolute; top: 0px; height: 43px; width: 2px; background: rgb(217, 48, 37); pointer-events: none; left: 307.538px; display: block;"><div id="urgency-vlabel" style="position:absolute;top:-22px;left:4px;font-size:9.5px;font-weight:800;color:#D93025;white-space:nowrap;background:rgba(255,255,255,0.85);padding:1px 3px;border-radius:3px;">| Urgency: <span id="urgency-wks-label">12 wks</span></div></div>
+          <div id="urgency-vline" style="position:absolute;top:0;height:100%;width:2px;background:#D93025;pointer-events:none;left:calc(134px + (100% - 134px) * 12 / 52);"><div id="urgency-vlabel" style="position:absolute;top:-22px;left:4px;font-size:9.5px;font-weight:800;color:#D93025;white-space:nowrap;background:rgba(255,255,255,0.85);padding:1px 3px;border-radius:3px;">| Urgency: <span id="urgency-wks-label">12 wks</span></div></div>
     </div>
     <div style="font-size:9px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-left:134px;margin-bottom:2px;">Wks</div><div class="tl-axis"><span style="left:0%">0</span><span style="left:12.5%">6.5</span><span style="left:25%">13</span><span style="left:37.5%">19.5</span><span style="left:50%">26</span><span style="left:62.5%">32.5</span><span style="left:75%">39</span><span style="left:87.5%">45.5</span><span style="left:100%">52</span></div>
     <div class="tl-legend">
@@ -716,29 +718,29 @@
   </div>
 
   <!-- ════════ INSIGHT BAR ═════════════════════════════ -->
-  <div class="insight-bar lean" id="insight-bar">
-    <div class="insight-title" id="insight-title">Finance OS leads clearly — code-first is becoming credible at this scale.</div>
-    <div class="insight-text" id="insight-text">This profile still favours Finance OS on speed (4 vs 24 weeks), cost efficiency ($342K annual advantage), and finance ownership (89% vs 11%). However, at this revenue scale and budget level, a code-first platform earns consideration if enterprise data integration — not financial reporting — is the stated priority.</div>
-    <div class="insight-note" id="insight-note" style="display: none;"></div>
+  <div class="insight-bar green" id="insight-bar">
+    <div class="insight-title" id="insight-title">Finance OS is the decisive fit for this company profile.</div>
+    <div class="insight-text"  id="insight-text">Loading…</div>
+    <div class="insight-note"  id="insight-note"></div>
   </div>
 
   <!-- ════════ DEEP DIVE BUTTONS ══════════════════════ -->
   <div class="dd-row">
-    <button class="dd-btn" id="dd-cfo" onclick="askAI(&#39;cfo&#39;,this)">
+    <button class="dd-btn" id="dd-cfo" onclick="askAI('cfo',this)">
       <span class="dd-icon">💬</span>
       <div>
         <div class="dd-text">Common CFO questions</div>
         <div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:2px;">Tailored to this profile</div>
       </div>
     </button>
-    <button class="dd-btn" id="dd-engagement" onclick="askAI(&#39;engagement&#39;,this)">
+    <button class="dd-btn" id="dd-engagement" onclick="askAI('engagement',this)">
       <span class="dd-icon">📋</span>
       <div>
         <div class="dd-text">Engagement structure end to end</div>
         <div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:2px;">Sprint + retainer roadmap</div>
       </div>
     </button>
-    <button class="dd-btn" id="dd-engineering" onclick="askAI(&#39;engineering&#39;,this)">
+    <button class="dd-btn" id="dd-engineering" onclick="askAI('engineering',this)">
       <span class="dd-icon">🛡️</span>
       <div>
         <div class="dd-text">Common data engineering objections</div>
@@ -1360,6 +1362,5 @@ function closeAI(){
 document.querySelectorAll('input[type="range"]').forEach(slideFill);
 update();
 </script>
-
-
-</body></html>
+</body>
+</html>
