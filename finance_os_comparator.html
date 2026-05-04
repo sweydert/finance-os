@@ -913,7 +913,7 @@ function compute(){
   const cfScore =Math.round(cd.reduce((a,b)=>a+b,0)/11/10*99);
 
   const fosWks=Math.max(2,Math.round(urg*0.25+(chaos-1)*0.3));
-  const cfWks =Math.round(urg*1.4+chaos*1.5+3);
+  const cfWks =Math.round(20+chaos*4+rN*8+tN*4);  // complexity-driven: chaos, revenue scale, team size — not urgency
 
   let platformK=0;
   if(tier==='pbi')    platformK=Math.round(team*0.12+5+9);
@@ -921,7 +921,7 @@ function compute(){
 
   const overheadK=Math.round(team*2+chaos*3+10);
   const fosCostK=sprintFeeK+platformK+overheadK;
-  const cfCostK =Math.round(budget*0.5+10.643*Math.sqrt(budget)+chaos*12+urg*3+280);
+  const cfCostK =Math.round(budget*0.5+10.643*Math.sqrt(budget)+chaos*12+280);
   const advK=cfCostK-fosCostK;
 
   const fosOwn=Math.min(100,Math.max(10,Math.round(100-chaos*3-tN*8-sN*40+T.ownMod)));
